@@ -2,7 +2,9 @@
    author: Dan Elliott
    course: CS 455
    assignment: HW 1 Network Overlay
-*/ 
+*/
+package cs455.overlay.transport;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;

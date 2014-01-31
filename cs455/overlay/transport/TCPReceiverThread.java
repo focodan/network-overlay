@@ -3,7 +3,7 @@
    course: CS 455
    assignment: HW 1 Network Overlay
 */ 
-package cs455.overlay.wireformats;
+package cs455.overlay.transport;
 
 public class TCPReceiverThread {
 
