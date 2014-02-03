@@ -6,10 +6,19 @@
 package cs455.overlay.transport;
 
 import cs455.overlay.node.*;
+import java.net.*; //TODO reduce from * to specific packages
+import java.io.*; //TODO remove after debugging
 
 public class TCPServerThread extends Thread {
+    // Receiving host
+    cs455.overlay.node.Node node;
+    
+    // Our main socket
+    ServerSocket serve;
 
-    public TCPServerThread(cs455.overlay.node.Node n){
+    public TCPServerThread(cs455.overlay.node.Node n) throws IOException{
+        this.node = n;
+        serve = new ServerSocket(n.getPort());
     }
 
     public String toString(){
@@ -17,7 +26,16 @@ public class TCPServerThread extends Thread {
     }
     
     public void run(){
-        ;
+        System.out.println(this); //TODO remove after debugging
+        while(true){ //QUESTION for TA: Will my receiver thread go out of scope?
+                    // How do I manage these threads?
+            try{
+                Socket s = serve.accept();
+                TCPReceiverThread r = new TCPReceiverThread(s,this.node);
+                r.start();
+            }
+            catch(Exception e){ } //TODO refine Exception type
+        }
     }
 
 }
