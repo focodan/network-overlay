@@ -17,7 +17,7 @@ public class TCPReceiverThread extends Thread {
     Socket receive;
     
     public TCPReceiverThread(Socket recieve, Node n){
-        
+        //TODO implement
     }
 
     public String toString(){
@@ -31,6 +31,9 @@ public class TCPReceiverThread extends Thread {
         */
         //JUST for testing ...
         (this.node).onEvent(new cs455.overlay.wireformats.Register("bob",5));
+        while(true){
+            ; // accept socket messages, pass to node reference
+        }
     }
 
 }

@@ -7,6 +7,7 @@ package cs455.overlay.node;
 
 import cs455.overlay.transport.*;
 import cs455.overlay.wireformats.*;
+import cs455.overlay.connection.*;
 import java.io.*; //TODO remove/reduce after debugging is finished
 import java.util.*; //TODO remove/reduce after debugging is finished
 
@@ -30,14 +31,20 @@ public class Registry implements Node{
     public int getPort(){
         return this.port;
     }
-    
-    public void onEvent(Event e){
-        //case switch
-        System.out.println("onEvent unimplemented in Registry");
-    }
 
     public String toString(){
         return "Registry class";
+    }
+    
+    public synchronized void onEvent(Event e){
+        System.out.println("onEvent unimplemented in MessagingNode");
+    }
+
+    public synchronized void registerConnection(Connection c){
+        System.out.println("onEvent unimplemented in MessagingNode");
+    }
+    public synchronized void deregisterConnection(Connection c){
+        System.out.println("onEvent unimplemented in MessagingNode");
     }
     
     /**-------- MAIN ---------------------------------*/

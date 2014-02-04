@@ -6,10 +6,14 @@
 package cs455.overlay.node;
 
 import cs455.overlay.wireformats.*;
+import cs455.overlay.transport.*;
+import cs455.overlay.connection.*;
 
 public interface Node {
 
     public void onEvent(Event e);
+    public void registerConnection(Connection c);
+    public void deregisterConnection(Connection c);
     public int getPort();
 
 }
