@@ -16,12 +16,14 @@ public class TCPReceiverThread extends Thread {
     private cs455.overlay.node.Node node;
     private Socket socket;
     private DataInputStream din;
+    private EventFactory factory; 
     
     public TCPReceiverThread(Socket receive, cs455.overlay.node.Node n)
                             throws IOException{
         this.node = n;
         this.socket = receive;
         this.din = new DataInputStream(socket.getInputStream());
+        this.factory = EventFactory.getInstance();
     }
     
     public void run(){ //TODO figure out how to send byte[] as an Event
@@ -32,6 +34,8 @@ public class TCPReceiverThread extends Thread {
                 dataLength = din.readInt();
              	byte[] data = new byte[dataLength];
                 din.readFully(data, 0, dataLength);
+                // call the event factory and pass the new event to node
+                node.onEvent(factory.makeEvent(data));
             } catch (SocketException se) {
                 System.out.println(se.getMessage());
                 break;

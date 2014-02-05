@@ -46,8 +46,13 @@ public class Connection {
     }
     
     //send Even data through TCPSender
-    public boolean sendData(Byte[] bytes){
-        return false; //TODO implement
+    public boolean sendData(byte[] bytes){//TODO why does this return boolean?
+        boolean status = true; //whether data could be sent successfuly 
+        try{
+            sender.sendData(bytes);
+        }
+        catch(IOException e){ status = false; } //TODO decide how to fail
+        return status;
     }
 
 }
