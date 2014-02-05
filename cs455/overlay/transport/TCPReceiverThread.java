@@ -12,28 +12,40 @@ import java.net.*; //TODO reduce after debugging
 
 public class TCPReceiverThread extends Thread {
 
-    //node info? ...
-    cs455.overlay.node.Node node;
-    Socket receive;
+    // Our host node, socket, and input stream
+    private cs455.overlay.node.Node node;
+    private Socket socket;
+    private DataInputStream din;
     
-    public TCPReceiverThread(Socket recieve, Node n){
-        //TODO implement
+    public TCPReceiverThread(Socket receive, cs455.overlay.node.Node n)
+                            throws IOException{
+        this.node = n;
+        this.socket = receive;
+        this.din = new DataInputStream(socket.getInputStream());
     }
+    
+    public void run(){ //TODO figure out how to send byte[] as an Event
+                        // to node
+        int dataLength;
+        while (socket != null){
+            try {
+                dataLength = din.readInt();
+             	byte[] data = new byte[dataLength];
+                din.readFully(data, 0, dataLength);
+            } catch (SocketException se) {
+                System.out.println(se.getMessage());
+                break;
+            } catch (IOException ioe) {
+                System.out.println(ioe.getMessage());
+                break;
+            }
+        }
 
+    }
+    
+    
     public String toString(){
         return "TCPReceiverThread class";
-    }
-    
-    public void run(){
-        System.out.println(this);
-        /* 
-         Listen for appropriate communications ... 
-        */
-        //JUST for testing ...
-        (this.node).onEvent(new cs455.overlay.wireformats.Register("bob",5));
-        while(true){
-            ; // accept socket messages, pass to node reference
-        }
     }
 
 }

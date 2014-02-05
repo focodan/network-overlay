@@ -6,7 +6,6 @@
 package cs455.overlay.wireformats;
 
 public class EventFactory {
-    
     //singleton
     private static final EventFactory factory = new EventFactory();
     private EventFactory() { }

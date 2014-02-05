@@ -9,7 +9,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-
 public class TCPSender {
 
 	private Socket socket;	
@@ -18,7 +17,7 @@ public class TCPSender {
 	public TCPSender(Socket socket) throws IOException {	
 		this.socket = socket;	
 		dout = new DataOutputStream(socket.getOutputStream());	
-	}	
+	}
 
 	public void sendData(byte[] dataToSend) throws IOException {	
 		int dataLength = dataToSend.length;	
