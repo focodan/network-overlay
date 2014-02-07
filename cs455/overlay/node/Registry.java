@@ -37,14 +37,14 @@ public class Registry implements Node{
     }
     
     public synchronized void onEvent(Event e){
-        System.out.println("onEvent unimplemented in MessagingNode");
+        System.out.println("onEvent in MessagingNode receiving:"+e.getType());
     }
 
     public synchronized void registerConnection(Connection c){
-        System.out.println("onEvent unimplemented in MessagingNode");
+        System.out.println("registerConnection unimplemented in MessagingNode");
     }
     public synchronized void deregisterConnection(Connection c){
-        System.out.println("onEvent unimplemented in MessagingNode");
+        System.out.println("deregisterConnection unimplemented in MessagingNode");
     }
     
     /**-------- MAIN ---------------------------------*/
@@ -55,6 +55,7 @@ public class Registry implements Node{
         /*
           do any setups and commandline parsing here
         */
+        System.out.println("Registry main()");
         port = 5000;
         try{
             Registry reg = new Registry(port);

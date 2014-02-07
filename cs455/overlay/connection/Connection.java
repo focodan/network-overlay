@@ -14,7 +14,7 @@ import java.net.*; //TODO remove/reduce after debugging is finished
 
 public class Connection {
     //Reference to this connection's owner
-    Node node;
+    private Node node;
 
     //Use host info of peer as unique key for this connection
     //ID is of the format "IPAddress:port"
@@ -43,6 +43,14 @@ public class Connection {
     //return key for this connection
     public String getID(){
         return new String(this.ID);
+    }
+    
+    public String getLocalIP(){
+        return socket.getLocalAddress().toString();
+    }
+    
+    public int getLocalPort(){
+        return socket.getPort();
     }
     
     //send Even data through TCPSender

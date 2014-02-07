@@ -44,10 +44,9 @@ public class TCPReceiverThread extends Thread {
                 break;
             }
         }
-
     }
-    
-    
+
+
     public String toString(){
         return "TCPReceiverThread class";
     }
