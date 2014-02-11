@@ -76,8 +76,14 @@ public class Register implements Event, Protocol {
 	}
 	
 	public int getType(){
-		return this.type;
+            return this.type;
 	}
+        public String getIPAddr(){
+            return this.IPaddr;
+        }
+        public int getPort(){
+            return this.port;
+        }
 
 	public String toString(){
 		return "Register class";

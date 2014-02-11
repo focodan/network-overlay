@@ -31,29 +31,45 @@ public class EventFactory {
         new DataInputStream(new BufferedInputStream(baInputStream));
 
         int type = din.readInt();
-        /*
-        int identifierLength = din.readInt();
-        byte[] identifierBytes = new byte[identifierLength];
-        din.readFully(identifierBytes);	
-        this.IPaddr = new String(identifierBytes);
-        this.port = din.readInt();
-        */
+        
         baInputStream.close();
         din.close();
 
         switch(type){
-            case Protocol.REGISTER_REQUEST: result = new Register(data); break;
-            /*case Protocol.REGISTER_REQUEST: result = new Register(data); break;
-            case Protocol.REGISTER_REQUEST: result = new Register(data); break;
-            case Protocol.REGISTER_REQUEST: result = new Register(data); break;
-            case Protocol.REGISTER_REQUEST: result = new Register(data); break;
-            case Protocol.REGISTER_REQUEST: result = new Register(data); break;
-            case Protocol.REGISTER_REQUEST: result = new Register(data); break;
-            case Protocol.REGISTER_REQUEST: result = new Register(data); break;
-            case Protocol.REGISTER_REQUEST: result = new Register(data); break;*/
-            default: /* add error handling, possibly throw*/ break;
-        }
+            case Protocol.REGISTER_REQUEST: {
+                result = new Register(data); break;
+            }
+            case Protocol.REGISTER_RESPONSE: {
+                result = new RegisterResponse(data); break;
+            }
+            case Protocol.DEREGISTER_REQUEST: {
+                result = new Deregister(data); break;
+            }
+            case Protocol.DEREGISTER_RESPONSE: {
+                result = new DeregisterResponse(data); break;
+            }
+            case Protocol.MESSAGING_NODES_LIST: {
+                result = new MessagingNodesList(data); break;
+            }
+            case Protocol.Link_Weights: {
+                result = new LinkWeights(data); break;
+            }
+            case Protocol.TASK_INITIATE: {
+                 result = new TaskInitiate(data); break;
+            }
+            case Protocol.TASK_COMPLETE: {
+                 result = new TaskComplete(data); break;
+            }
+            case Protocol.PULL_TRAFIC_SUMMARY: {
+                 result = new TaskSummaryRequest(data); break;
+            }
+            case Protocol.TRAFFIC_SUMMARY: {
+                 result = new TaskSummaryResponse(data); break;
+            }
+            default: /* add error handling, possibly throw*/ break; 
+        } 
         }catch(IOException e){} //TODO fill in...
+
         return result;
     }
 }

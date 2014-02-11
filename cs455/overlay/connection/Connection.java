@@ -36,8 +36,12 @@ public class Connection {
         (this.node).registerConnection(this);
     }
     
-    private String makeID(Socket socket){
+    public static String makeID(Socket socket){
         return new String(socket.getLocalAddress().toString() + ":" + socket.getPort());
+    }
+
+    public static String makeID(String IP, int port){
+        return new String(IP + ":" + port);
     }
     
     //return key for this connection

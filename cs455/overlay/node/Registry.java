@@ -17,13 +17,17 @@ public class Registry implements Node{
     
     // Registry's networking services
     private cs455.overlay.transport.TCPServerThread serverThread;
-    private cs455.overlay.transport.TCPSender sender;
+    //private cs455.overlay.transport.TCPSender sender; //handled in Connection-level 
 
     // Data structures for managing messaging nodes
-    // TODO fill-in
+    HashMap<String,Connection> incomingConnections;
+    HashMap<String,Connection> messagingNodes;
+
     
     public Registry(int port) throws IOException{
         this.port = port;
+        incomingConnections = new HashMap<String,Connection>();
+        messagingNodes = new HashMap<String,Connection>();
         serverThread = new TCPServerThread(this);
         serverThread.start();
     }
@@ -38,10 +42,34 @@ public class Registry implements Node{
     
     public synchronized void onEvent(Event e){
         System.out.println("onEvent in MessagingNode receiving:"+e.getType());
+        int eventType = e.getType();
+        String ID;
+        switch(eventType){
+            case Protocol.REGISTER_REQUEST: {
+                System.out.println("   event is a registry request");
+                //TODO add error handling
+                // move the connection associated with the e from incoming to messagingNodes
+                try{
+                Register event = new Register(e.getBytes());
+                ID = Connection.makeID(event.getIPAddr(),event.getPort());
+                if(incomingConnections.containsKey(ID)){}
+                else{
+                    System.out.println("Adding "+ID+" to Registry");
+                    messagingNodes.put(ID,incomingConnections.get(ID));
+                    incomingConnections.remove(ID);
+                }
+                }catch(Exception io){}
+                break;
+            }
+            default: /* add error handling, possibly throw*/ break;
+        }
     }
 
     public synchronized void registerConnection(Connection c){
-        System.out.println("registerConnection unimplemented in MessagingNode");
+        //System.out.println("registerConnection unimplemented in MessagingNode");
+        System.out.println("registerConnection on "+c.getID()+" in Registry");
+        //TODO decide how to handle duplicates and check for them
+        incomingConnections.put(c.getID(),c);
     }
     public synchronized void deregisterConnection(Connection c){
         System.out.println("deregisterConnection unimplemented in MessagingNode");

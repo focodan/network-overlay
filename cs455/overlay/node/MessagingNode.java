@@ -30,6 +30,7 @@ public class MessagingNode implements Node{
     
     // Dijkstra's
     // TODO ...
+    HashMap<String,Connection> messagingNodes;
     
     // Tracking info
     private int sendTracker;
@@ -43,6 +44,9 @@ public class MessagingNode implements Node{
         this.registryPort = registryPort;
         
         initializeTrackingInfo();
+
+        // Data structure for peer messaging nodes
+        messagingNodes = new HashMap<String,Connection>();  
         
         serverThread = new TCPServerThread(this);
         serverThread.start();
@@ -93,13 +97,9 @@ public class MessagingNode implements Node{
 
     /** -------- main -------------------------------------*/
     public static void main(String[] args){
-        //m.registerConnection(new Connection( //Connect to registry
         System.out.println("Messaging node main()");
         try{
             MessagingNode m = new MessagingNode("pikes",5000);
-            //Socket s = new Socket("pikes",5000);
-            //m.registerConnection(new Connection(s,m));
         }catch(Exception e){}
     }
-
 }
