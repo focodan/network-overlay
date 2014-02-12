@@ -8,6 +8,7 @@ package cs455.overlay.connection;
 import cs455.overlay.transport.*;
 import cs455.overlay.wireformats.*;
 import cs455.overlay.node.*;
+import cs455.overlay.util.*;
 import java.io.*; //TODO remove/reduce after debugging is finished
 import java.util.*; //TODO remove/reduce after debugging is finished
 import java.net.*; //TODO remove/reduce after debugging is finished
@@ -28,20 +29,12 @@ public class Connection {
     public Connection(Socket s, Node n) throws IOException{
         this.node = n;
         this.socket = s;
-        this.ID = makeID(this.socket);
+        this.ID = SocketID.socketID(this.socket);
         this.sender = new cs455.overlay.transport.TCPSender(this.socket);
         this.receiver= new cs455.overlay.transport.TCPReceiverThread(
                                                 this.socket, this.node);
         this.receiver.start();
         (this.node).registerConnection(this);
-    }
-    
-    public static String makeID(Socket socket){
-        return new String(socket.getLocalAddress().toString() + ":" + socket.getPort());
-    }
-
-    public static String makeID(String IP, int port){
-        return new String(IP + ":" + port);
     }
     
     //return key for this connection

@@ -13,7 +13,7 @@ import java.util.*; //TODO remove/reduce after debugging
 import java.net.*; //TODO remove/reduce after debugging
 
 
-public class MessagingNode implements Node{
+public class MessagingNode implements Node{ //TODO remember to keep track of ServerSocket for Registry
     // Personal info
     private int port;
     private String IPAddr;
@@ -26,7 +26,6 @@ public class MessagingNode implements Node{
     
     // Networking services
     private cs455.overlay.transport.TCPServerThread serverThread;
-    //private cs455.overlay.transport.TCPSender sender; //handle in Connection
     
     // Dijkstra's
     // TODO ...
@@ -83,8 +82,7 @@ public class MessagingNode implements Node{
         return "MessagingNode class";
     }
     
-
-    public synchronized void onEvent(Event e){
+    public synchronized void onEvent(Event e, String connectID){
         System.out.println("onEvent unimplemented in MessagingNode");
     }
 
@@ -99,7 +97,7 @@ public class MessagingNode implements Node{
     public static void main(String[] args){
         System.out.println("Messaging node main()");
         try{
-            MessagingNode m = new MessagingNode("pikes",5000);
+            MessagingNode m = new MessagingNode("frankfort",5000);
         }catch(Exception e){}
     }
 }

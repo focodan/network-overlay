@@ -8,6 +8,7 @@ package cs455.overlay.node;
 import cs455.overlay.transport.*;
 import cs455.overlay.wireformats.*;
 import cs455.overlay.connection.*;
+import cs455.overlay.util.*;
 import java.io.*; //TODO remove/reduce after debugging is finished
 import java.util.*; //TODO remove/reduce after debugging is finished
 
@@ -17,17 +18,22 @@ public class Registry implements Node{
     
     // Registry's networking services
     private cs455.overlay.transport.TCPServerThread serverThread;
-    //private cs455.overlay.transport.TCPSender sender; //handled in Connection-level 
 
     // Data structures for managing messaging nodes
     HashMap<String,Connection> incomingConnections;
     HashMap<String,Connection> messagingNodes;
-
     
+    // Link weights and overlay ...
+    // ...
+    
+    // For making events
+    EventFactory factory;
+
     public Registry(int port) throws IOException{
         this.port = port;
         incomingConnections = new HashMap<String,Connection>();
         messagingNodes = new HashMap<String,Connection>();
+        factory = EventFactory.getInstance();
         serverThread = new TCPServerThread(this);
         serverThread.start();
     }
@@ -39,44 +45,87 @@ public class Registry implements Node{
     public String toString(){
         return "Registry class";
     }
-    
-    public synchronized void onEvent(Event e){
+
+    public synchronized void onEvent(Event e, String connectID){
         System.out.println("onEvent in MessagingNode receiving:"+e.getType());
         int eventType = e.getType();
         String ID;
         switch(eventType){
             case Protocol.REGISTER_REQUEST: {
-                System.out.println("   event is a registry request");
-                //TODO add error handling
-                // move the connection associated with the e from incoming to messagingNodes
-                try{
-                Register event = new Register(e.getBytes());
-                ID = Connection.makeID(event.getIPAddr(),event.getPort());
-                if(incomingConnections.containsKey(ID)){}
-                else{
-                    System.out.println("Adding "+ID+" to Registry");
-                    messagingNodes.put(ID,incomingConnections.get(ID));
-                    incomingConnections.remove(ID);
-                }
-                }catch(Exception io){}
+
+                //call handleRegRequest to get response
+                // if response is non-null, send it via connectID's Connection
+
+
                 break;
             }
-            default: /* add error handling, possibly throw*/ break;
+            default: /* TODO add error handling */ break;
         }
     }
 
-    public synchronized void registerConnection(Connection c){
-        //System.out.println("registerConnection unimplemented in MessagingNode");
+    //Adds connection c to the list of connections, NOT to the list of MessagingNodes
+    public synchronized void registerConnection(Connection c) {
         System.out.println("registerConnection on "+c.getID()+" in Registry");
-        //TODO decide how to handle duplicates and check for them
-        incomingConnections.put(c.getID(),c);
+        
+        if(!(incomingConnections.containsKey(incomingConnections.containsKey(c.getID())))){
+            incomingConnections.put(c.getID(),c);
+        }
+        else{ //TODO change error handling, if any should be used
+            //throw new IOException("Cannot register duplicate connection: "+c.getID());
+        }
     }
+    
+    //Removes connection c from list of connections, NOT from list of MessagingNodes
     public synchronized void deregisterConnection(Connection c){
-        System.out.println("deregisterConnection unimplemented in MessagingNode");
+        System.out.println("deregisterConnection on "+c.getID());
+        incomingConnections.remove(c.getID()); //TODO fails silently, perhaps change
     }
     
+    //handles registration request, returns generated response event.
+    private Event handleRegRequest(Event regRequest, String connectID){
+        Event response = null;
+        String additionalInfo = ""; //to avoid passing null references
+        byte statusCode = 0; //assumed valid 'til proven otherwise
+        try{
+            // create Register object from event and get its socket ID
+            Register reg = new Register(regRequest.getBytes());
+            String regID = SocketID.socketID(reg.getIPAddr(),reg.getPort());
+
+            // check if its connection is valid
+            if(incomingConnections.containsKey(regID)){}
+            
+            //check if it is not already registered
+            // check if its connection matches connectID
+            // if good status --> copy connection to message node list
+            // create Response object to return
+            
+            
+            
+            /* // sample code to work with ...
+            Register event = new Register(e.getBytes());
+            ID = SocketID.socketID(event.getIPAddr(),event.getPort());
+            if(incomingConnections.containsKey(ID)){}
+            else{
+                System.out.println("Adding "+ID+" to Registry");
+                messagingNodes.put(ID,incomingConnections.get(ID));
+                incomingConnections.remove(ID);
+           } */
+        }
+        /*catch(SocketException se){
+        }
+        catch(IOException ie){
+        }*/
+        catch(Exception e){
+            e.printStackTrace();
+        }
+
+        return response;
+    }
+
+
+
     /**-------- MAIN ---------------------------------*/
-    
+
     public static void main(String[] args){
         int port;
         Scanner scan = new Scanner(System.in);
@@ -88,19 +137,19 @@ public class Registry implements Node{
         try{
             Registry reg = new Registry(port);
         } catch(Exception e){};
-        
+
         System.out.println("Registry accepting commands ...");
         while(true){
             /*
               Allow commands to be given here
             */
-            
+
             // Proof of concept for foreground process, thread independence ...
             System.out.println("enter command...");
             int response = scan.nextInt();
             System.out.println(response);
         }
-        
+
     }
 
 }

@@ -11,9 +11,8 @@ import cs455.overlay.connection.*;
 
 public interface Node {
 
-    public void onEvent(Event e);
+    public void onEvent(Event e, String connectID);
     public void registerConnection(Connection c);
     public void deregisterConnection(Connection c);
-    public int getPort();
-
+    public int  getPort();
 }

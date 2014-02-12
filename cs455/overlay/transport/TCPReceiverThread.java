@@ -7,6 +7,7 @@ package cs455.overlay.transport;
 
 import cs455.overlay.node.*;
 import cs455.overlay.wireformats.*;
+import cs455.overlay.util.*;
 import java.io.*; //TODO remove/reduce after debugging
 import java.net.*; //TODO reduce after debugging
 
@@ -26,8 +27,7 @@ public class TCPReceiverThread extends Thread {
         this.factory = EventFactory.getInstance();
     }
     
-    public void run(){ //TODO figure out how to send byte[] as an Event
-                        // to node
+    public void run(){
         int dataLength;
         while (socket != null){
             try {
@@ -35,7 +35,7 @@ public class TCPReceiverThread extends Thread {
              	byte[] data = new byte[dataLength];
                 din.readFully(data, 0, dataLength);
                 // call the event factory and pass the new event to node
-                node.onEvent(factory.makeEvent(data));
+                node.onEvent(factory.makeEvent(data),SocketID.socketID(socket));
             } catch (SocketException se) {
                 System.out.println(se.getMessage());
                 break;
