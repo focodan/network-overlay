@@ -43,7 +43,7 @@ public class Connection {
     }
     
     public String getLocalIP(){
-        return socket.getLocalAddress().toString();
+        return socket.getLocalAddress().toString(); //TODO change to Inet
     }
     
     public int getLocalPort(){

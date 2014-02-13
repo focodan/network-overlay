@@ -19,9 +19,9 @@ public class MessagingNode implements Node{ //TODO remember to keep track of Ser
     private String IPAddr;
     
     // Registry info
-    private int registryPort;
-    private String registryIPAddr;
-    private Connection registryConnection;
+    private int registryPort; // its serversocket
+    private String registryIPAddr; // its serversocket
+    private Connection registryConnection; // for regular message-passing
     //TODO special attribute for Connection to Registry
     
     // Networking services
@@ -83,7 +83,35 @@ public class MessagingNode implements Node{ //TODO remember to keep track of Ser
     }
     
     public synchronized void onEvent(Event e, String connectID){
-        System.out.println("onEvent unimplemented in MessagingNode");
+        System.out.println("onEvent in MessagingNode receiving:"+e.getType()+" from: "+connectID);
+        int eventType = e.getType();
+        String ID;
+        switch(eventType){
+            // TODO write out appropriate cases
+            case Protocol.REGISTER_RESPONSE: {
+
+                //
+                try{
+                    RegisterResponse response = new RegisterResponse(e.getBytes());
+                    byte status = response.getStatus();
+                    if(status == 0){
+                        System.out.println("Now registered at Registry. Response: "+response.getInfo());
+                    }
+                    else{
+                        System.out.println("Unable to register at Registry. Response: "+response.getInfo());
+                    }
+                } catch(Exception er){ er.printStackTrace(); }
+                /*if(response != null){
+                    try{
+                        incomingConnections.get(connectID).sendData(response.getBytes());
+                    }catch(IOException ie){
+                        ie.printStackTrace();
+                    }
+                }*/
+                break;
+            }
+            default: /* TODO add error handling */ break;
+        }
     }
 
     public synchronized void registerConnection(Connection c){
@@ -97,7 +125,7 @@ public class MessagingNode implements Node{ //TODO remember to keep track of Ser
     public static void main(String[] args){
         System.out.println("Messaging node main()");
         try{
-            MessagingNode m = new MessagingNode("frankfort",5000);
+            MessagingNode m = new MessagingNode("sacramento",5000);
         }catch(Exception e){}
     }
 }

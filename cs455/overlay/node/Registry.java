@@ -47,7 +47,7 @@ public class Registry implements Node{
     }
 
     public synchronized void onEvent(Event e, String connectID){
-        System.out.println("onEvent in MessagingNode receiving:"+e.getType());
+        System.out.println("onEvent in MessagingNode receiving:"+e.getType()+" from: "+connectID);
         int eventType = e.getType();
         String ID;
         switch(eventType){
@@ -55,8 +55,14 @@ public class Registry implements Node{
 
                 //call handleRegRequest to get response
                 // if response is non-null, send it via connectID's Connection
-
-
+                Event response = handleRegRequest(e, connectID);
+                if(response != null){
+                    try{
+                        incomingConnections.get(connectID).sendData(response.getBytes());
+                    }catch(IOException ie){
+                        ie.printStackTrace();
+                    }
+                }
                 break;
             }
             default: /* TODO add error handling */ break;
@@ -85,31 +91,36 @@ public class Registry implements Node{
     private Event handleRegRequest(Event regRequest, String connectID){
         Event response = null;
         String additionalInfo = ""; //to avoid passing null references
-        byte statusCode = 0; //assumed valid 'til proven otherwise
+        byte status = 0; //assumed valid 'til proven otherwise
         try{
             // create Register object from event and get its socket ID
             Register reg = new Register(regRequest.getBytes());
             String regID = SocketID.socketID(reg.getIPAddr(),reg.getPort());
 
             // check if its connection is valid
-            if(incomingConnections.containsKey(regID)){}
-            
+            if(!incomingConnections.containsKey(regID)){
+                status += 1;
+                additionalInfo += regID + " is not a valid connection. ";
+            }
             //check if it is not already registered
+            if(!messagingNodes.containsKey(regID)){
+                status += 2;
+                additionalInfo += regID + " is already registered. ";
+            }
             // check if its connection matches connectID
+            if(!regID.equals(connectID)){
+                status += 4;
+                additionalInfo += regID + 
+                    " does not match its connection info:"+connectID+". ";
+            }
             // if good status --> copy connection to message node list
+            if(status == 0){
+                System.out.println("Adding "+regID+" to registry");
+                messagingNodes.put(regID,incomingConnections.get(regID));
+            }
             // create Response object to return
-            
-            
-            
-            /* // sample code to work with ...
-            Register event = new Register(e.getBytes());
-            ID = SocketID.socketID(event.getIPAddr(),event.getPort());
-            if(incomingConnections.containsKey(ID)){}
-            else{
-                System.out.println("Adding "+ID+" to Registry");
-                messagingNodes.put(ID,incomingConnections.get(ID));
-                incomingConnections.remove(ID);
-           } */
+            //TODO perhaps better style to use factory
+            response = new RegisterResponse(status,additionalInfo);
         }
         /*catch(SocketException se){
         }
@@ -121,8 +132,6 @@ public class Registry implements Node{
 
         return response;
     }
-
-
 
     /**-------- MAIN ---------------------------------*/
 
