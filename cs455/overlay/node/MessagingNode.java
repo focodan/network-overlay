@@ -22,7 +22,6 @@ public class MessagingNode implements Node{
     private int registryPort; // its serversocket
     private String registryIPAddr; // its serversocket
     private Connection registryConnection; // for regular message-passing
-    //TODO special attribute for Connection to Registry
     
     // Networking services
     private cs455.overlay.transport.TCPServerThread serverThread;
@@ -77,9 +76,9 @@ public class MessagingNode implements Node{
         this.registryConnection = new Connection(s,this);
         // Send registration request
         Event registryRequest = new Register((this.registryConnection).getLocalIP(),
-                            (this.registryConnection).getLocalPort());
+                            (this.registryConnection).getLocalPort(),
+                            (this.registryConnection).getLocalServerPort());
         (this.registryConnection).sendData(registryRequest.getBytes());
-                
     }
 
     public String toString(){
@@ -99,7 +98,7 @@ public class MessagingNode implements Node{
                     if(status == 0){
                         System.out.println("Now registered at Registry. Response: "+response.getInfo());
                     }
-                    else{
+                    else{ //TODO perhaps System.exit(0) upon failure to register, or send additional requests
                         System.out.println("Unable to register at Registry. Response: "+response.getInfo());
                     }
                 } catch(Exception er){ er.printStackTrace(); }
@@ -127,7 +126,7 @@ public class MessagingNode implements Node{
     public static void main(String[] args){
         System.out.println("Messaging node main()");
         try{
-            MessagingNode m = new MessagingNode("frankfort",5000);
+            MessagingNode m = new MessagingNode("indianapolis",5000);
         }catch(Exception e){}
     }
 }

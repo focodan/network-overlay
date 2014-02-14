@@ -34,7 +34,7 @@ public class Registry implements Node{
         incomingConnections = new HashMap<String,Connection>();
         messagingNodes = new HashMap<String,Connection>();
         factory = EventFactory.getInstance();
-        serverThread = new TCPServerThread(this);
+        serverThread = new TCPServerThread(this,port);
         serverThread.start();
     }
     
@@ -116,6 +116,7 @@ public class Registry implements Node{
             // if good status --> copy connection to message node list
             if(status == 0){
                 System.out.println("Adding "+regID+" to registry");
+                (incomingConnections.get(regID)).setInetServerPort(reg.getServerPort());
                 messagingNodes.put(regID,incomingConnections.get(regID));
                 additionalInfo += "This is node "+(messagingNodes.size())+" in the registry";
             }

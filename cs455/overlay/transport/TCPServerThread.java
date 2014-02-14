@@ -18,8 +18,12 @@ public class TCPServerThread extends Thread {
     private ServerSocket serve;
 
     public TCPServerThread(cs455.overlay.node.Node n) throws IOException{
+        this(n,0); //if no preference for port, let library choose one
+    }
+    
+    public TCPServerThread(cs455.overlay.node.Node n, int port) throws IOException{
         this.node = n;
-        serve = new ServerSocket(n.getPort());
+        serve = new ServerSocket(port);
     }
 
     public String toString(){
@@ -31,7 +35,7 @@ public class TCPServerThread extends Thread {
         while(true){
             try{
                 Socket s = serve.accept();
-                new Connection(s, this.node);
+                new Connection(s, this.node, serve.getLocalPort());
             }
             catch(IOException e){
                 System.out.println(e.getMessage());

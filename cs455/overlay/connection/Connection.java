@@ -17,9 +17,10 @@ public class Connection {
     //Reference to this connection's owner
     private Node node;
 
-    //Use host info of peer as unique key for this connection
-    //ID is of the format "IPAddress:port"
+    //ID is of the format "IPAddress:port" for Inet, used as datastructure key
     private String ID;
+    private int localServerPort; // a new node connects with this.node using this port
+    private int inetServerPort; // a new node connects with remote node using this port
     
     //Network links
     private Socket socket;
@@ -27,6 +28,12 @@ public class Connection {
     private cs455.overlay.transport.TCPSender sender;
     
     public Connection(Socket s, Node n) throws IOException{
+        this(s,n,0);
+    }
+    
+    public Connection(Socket s, Node n, int localServerPort) throws IOException{
+        this.localServerPort = localServerPort;
+        this.inetServerPort = 0;
         this.node = n;
         this.socket = s;
         this.ID = SocketID.socketInetID(this.socket);
@@ -38,7 +45,7 @@ public class Connection {
     }
     
     //return key for this connection
-    public String getID(){ //TODO change to getInetID
+    public String getID(){ //TODO maybe change to getInetID
         return new String(this.ID);
     }
     
@@ -62,13 +69,25 @@ public class Connection {
         return socket.getPort();
     }
     
-    //send Even data through TCPSender
-    public boolean sendData(byte[] bytes){//TODO why does this return boolean?
-        boolean status = true; //whether data could be sent successfuly 
+    public int getLocalServerPort(){
+        return this.localServerPort;
+    }
+    
+    public int getInetServerPort(){
+        return this.inetServerPort;
+    }
+    
+    public void setInetServerPort(int p){
+        return this.inetServerPort = p;
+    }
+    
+    //send Event data through TCPSender
+    public boolean sendData(byte[] bytes){
+        boolean status = true;
         try{
             sender.sendData(bytes);
         }
-        catch(IOException e){ status = false; } //TODO decide how to fail
+        catch(IOException e){ status = false; }
         return status;
     }
 

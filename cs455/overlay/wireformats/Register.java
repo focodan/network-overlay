@@ -20,17 +20,20 @@ public class Register implements Event, Protocol {
     private int type;
     private String IPaddr;
     private int port;
+    private int serverPort;
 
-    public Register(String _IPaddr, int _port){
+    public Register(String _IPaddr, int _port, int _serverPort){
         IPaddr = _IPaddr;
         port = _port;
         type = REGISTER_REQUEST;
+        serverPort = _serverPort; 
     }
     
     // byte[] format for marshalling is the following
     //     type
     //     IPaddr
     //     port
+    //     serverPort
 
 	public Register(byte[] marshalledBytes) throws IOException {	
 		ByteArrayInputStream baInputStream =	
@@ -46,7 +49,9 @@ public class Register implements Event, Protocol {
 
 		this.IPaddr = new String(identifierBytes);	
 
-		this.port = din.readInt();	
+		this.port = din.readInt();
+		
+		this.serverPort = din.readInt();	
 
 		baInputStream.close();	
 		din.close();	
@@ -55,38 +60,40 @@ public class Register implements Event, Protocol {
 	public byte[] getBytes() throws IOException {	
 		byte[] marshalledBytes = null;	
 		ByteArrayOutputStream baOutputStream = new ByteArrayOutputStream();	
-		DataOutputStream dout =	
-				new DataOutputStream(new BufferedOutputStream(baOutputStream));	
+		DataOutputStream dout =
+				new DataOutputStream(new BufferedOutputStream(baOutputStream));
 
-		dout.writeInt(this.type);		
+		dout.writeInt(this.type);
 
-		byte[] identifierBytes = (this.IPaddr).getBytes();	
-		int elementLength = identifierBytes.length;	
-		dout.writeInt(elementLength);	
-		dout.write(identifierBytes);	
+		byte[] identifierBytes = (this.IPaddr).getBytes();
+		int elementLength = identifierBytes.length;
+		dout.writeInt(elementLength);
+		dout.write(identifierBytes);
 
-		dout.writeInt(this.port);	
+		dout.writeInt(this.port);
+		dout.writeInt(this.serverPort);
 
-		dout.flush();	
-		marshalledBytes = baOutputStream.toByteArray();	
+		dout.flush();
+		marshalledBytes = baOutputStream.toByteArray();
 
-		baOutputStream.close();	
-		dout.close();	
-		return marshalledBytes;	
+		baOutputStream.close();
+		dout.close();
+		return marshalledBytes;
 	}
 	
 	public int getType(){
-            return this.type;
+        return this.type;
 	}
-        public String getIPAddr(){
-            return this.IPaddr;
-        }
-        public int getPort(){
-            return this.port;
-        }
-
+    public String getIPAddr(){
+        return new String(this.IPaddr);
+    }
+    public int getPort(){
+        return this.port;
+    }
+    public int getServerPort(){
+        return this.serverPort;
+    }
 	public String toString(){
 		return "Register class";
 	}
-
 }
