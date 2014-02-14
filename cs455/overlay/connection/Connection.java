@@ -9,9 +9,9 @@ import cs455.overlay.transport.*;
 import cs455.overlay.wireformats.*;
 import cs455.overlay.node.*;
 import cs455.overlay.util.*;
-import java.io.*; //TODO remove/reduce after debugging is finished
-import java.util.*; //TODO remove/reduce after debugging is finished
-import java.net.*; //TODO remove/reduce after debugging is finished
+import java.io.*;
+import java.util.*;
+import java.net.*;
 
 public class Connection {
     //Reference to this connection's owner

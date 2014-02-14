@@ -103,7 +103,7 @@ public class Registry implements Node{
                 additionalInfo += regID + " is not a valid connection. ";
             }
             //check if it is not already registered
-            if(/*!*/messagingNodes.containsKey(regID)){
+            if(messagingNodes.containsKey(regID)){
                 status += 2;
                 additionalInfo += regID + " is already registered. ";
             }
@@ -133,11 +133,18 @@ public class Registry implements Node{
 
         return response;
     }
+    
+    private void setupOverlay(int degree){
+        System.out.println("setupOverlay("+degree+")");
+    }
 
     /**-------- MAIN ---------------------------------*/
 
     public static void main(String[] args){
+        Registry reg=null;
         int port;
+        String [] options = {"list-messaging-nodes","list-weights",
+            "setup-overlay","send-overlay-link-weights","start"};
         Scanner scan = new Scanner(System.in);
         /*
           do any setups and commandline parsing here
@@ -145,21 +152,44 @@ public class Registry implements Node{
         System.out.println("Registry main()");
         port = 5000;
         try{
-            Registry reg = new Registry(port);
-        } catch(Exception e){};
+            reg = new Registry(port);
+        }
+        catch(Exception e){ 
+            e.printStackTrace(); 
+            System.exit(0); 
+        };
 
         System.out.println("Registry accepting commands ...");
         while(true){
-            /*
-              Allow commands to be given here
-            */
-
-            // Proof of concept for foreground process, thread independence ...
-            System.out.println("enter command...");
+            System.out.println("Enter command: ");
             String response = scan.nextLine();
-            System.out.println(response);
+            System.out.println("You typed: "+response);
+            String [] responseArgs = response.split(" ");
+            
+            if(responseArgs[0].equals(options[0])){
+                ;
+            }
+            else if(responseArgs[0].equals(options[1])){
+                ;
+            }
+            else if(responseArgs[0].equals(options[2])){
+                if(responseArgs.length>1){
+                    Integer nodeDegree = new Integer(responseArgs[1]);
+                    reg.setupOverlay(nodeDegree);
+                }
+                else{
+                    System.out.println("Needs integer argument");
+                }
+            }
+            else if(responseArgs[0].equals(options[3])){
+                ;
+            }
+            else if(responseArgs[0].equals(options[4])){
+                ;
+            }
+            else{
+                System.out.println("Command unrecognized");
+            }
         }
-
     }
-
 }

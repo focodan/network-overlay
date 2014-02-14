@@ -8,12 +8,12 @@ package cs455.overlay.node;
 import cs455.overlay.wireformats.*;
 import cs455.overlay.transport.*;
 import cs455.overlay.connection.*;
-import java.io.*; //TODO remove/reduce after debugging
-import java.util.*; //TODO remove/reduce after debugging
-import java.net.*; //TODO remove/reduce after debugging
+import java.io.*;
+import java.util.*;
+import java.net.*;
 
 
-public class MessagingNode implements Node{ //TODO remember to keep track of ServerSocket for Registry
+public class MessagingNode implements Node{
     // Personal info
     private int port;
     private String IPAddr;
@@ -27,9 +27,13 @@ public class MessagingNode implements Node{ //TODO remember to keep track of Ser
     // Networking services
     private cs455.overlay.transport.TCPServerThread serverThread;
     
+    // Peer messaging nodes
+    HashMap<String,Connection> incomingConnections;
+    HashMap<String,Connection> messagingNodes;
+    
     // Dijkstra's
     // TODO ...
-    HashMap<String,Connection> messagingNodes;
+    //HashMap<String,Connection> messagingNodes;
     
     // Tracking info
     private int sendTracker;
@@ -89,8 +93,6 @@ public class MessagingNode implements Node{ //TODO remember to keep track of Ser
         switch(eventType){
             // TODO write out appropriate cases
             case Protocol.REGISTER_RESPONSE: {
-
-                //
                 try{
                     RegisterResponse response = new RegisterResponse(e.getBytes());
                     byte status = response.getStatus();
@@ -101,13 +103,6 @@ public class MessagingNode implements Node{ //TODO remember to keep track of Ser
                         System.out.println("Unable to register at Registry. Response: "+response.getInfo());
                     }
                 } catch(Exception er){ er.printStackTrace(); }
-                /*if(response != null){
-                    try{
-                        incomingConnections.get(connectID).sendData(response.getBytes());
-                    }catch(IOException ie){
-                        ie.printStackTrace();
-                    }
-                }*/
                 break;
             }
             default: /* TODO add error handling */ break;
@@ -115,7 +110,14 @@ public class MessagingNode implements Node{ //TODO remember to keep track of Ser
     }
 
     public synchronized void registerConnection(Connection c){
-        System.out.println("registerConnection unimplemented in MessagingNode");
+        System.out.println("registerConnection on "+c.getID()+" in MessagingNode");
+        
+        if(!(incomingConnections.containsKey(incomingConnections.containsKey(c.getID())))){
+            incomingConnections.put(c.getID(),c);
+        }
+        else{ //TODO change error handling, if any should be used
+            //throw new IOException("Cannot register duplicate connection: "+c.getID());
+        }
     }
     public synchronized void deregisterConnection(Connection c){
         System.out.println("deregisterConnection unimplemented in MessagingNode");
