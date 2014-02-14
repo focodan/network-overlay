@@ -125,7 +125,7 @@ public class MessagingNode implements Node{ //TODO remember to keep track of Ser
     public static void main(String[] args){
         System.out.println("Messaging node main()");
         try{
-            MessagingNode m = new MessagingNode("sacramento",5000);
+            MessagingNode m = new MessagingNode("frankfort",5000);
         }catch(Exception e){}
     }
 }

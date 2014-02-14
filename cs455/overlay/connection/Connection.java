@@ -29,7 +29,7 @@ public class Connection {
     public Connection(Socket s, Node n) throws IOException{
         this.node = n;
         this.socket = s;
-        this.ID = SocketID.socketID(this.socket);
+        this.ID = SocketID.socketInetID(this.socket);
         this.sender = new cs455.overlay.transport.TCPSender(this.socket);
         this.receiver= new cs455.overlay.transport.TCPReceiverThread(
                                                 this.socket, this.node);
@@ -38,15 +38,27 @@ public class Connection {
     }
     
     //return key for this connection
-    public String getID(){
+    public String getID(){ //TODO change to getInetID
         return new String(this.ID);
     }
     
+    public String getLocalID(){
+        return new String(this.ID);
+    }
+    
+    public String getInetIP(){
+        return socket.getInetAddress().toString();
+    }
+    
     public String getLocalIP(){
-        return socket.getLocalAddress().toString(); //TODO change to Inet
+        return socket.getLocalAddress().toString();
     }
     
     public int getLocalPort(){
+        return socket.getLocalPort();
+    }
+    
+    public int getInetPort(){
         return socket.getPort();
     }
     

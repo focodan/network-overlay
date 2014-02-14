@@ -9,8 +9,12 @@ import java.net.*;
 
 public class SocketID {
 
-    public static String socketID(Socket socket){
-        return new String(socket.getLocalAddress().toString() + ":" + socket.getPort()); //TODO change to Inet
+    public static String socketInetID(Socket socket){ // ID for remote connection
+        return new String(socket.getInetAddress().toString() + ":" + socket.getPort());
+    }
+    
+    public static String socketLocalID(Socket socket){ // ID for local connection
+        return new String(socket.getLocalAddress().toString() + ":" + socket.getLocalPort());
     }
 
     public static String socketID(String IP, int port){

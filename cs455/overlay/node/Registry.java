@@ -103,7 +103,7 @@ public class Registry implements Node{
                 additionalInfo += regID + " is not a valid connection. ";
             }
             //check if it is not already registered
-            if(!messagingNodes.containsKey(regID)){
+            if(/*!*/messagingNodes.containsKey(regID)){
                 status += 2;
                 additionalInfo += regID + " is already registered. ";
             }
@@ -117,6 +117,7 @@ public class Registry implements Node{
             if(status == 0){
                 System.out.println("Adding "+regID+" to registry");
                 messagingNodes.put(regID,incomingConnections.get(regID));
+                additionalInfo += "This is node "+(messagingNodes.size())+" in the registry";
             }
             // create Response object to return
             //TODO perhaps better style to use factory
@@ -155,7 +156,7 @@ public class Registry implements Node{
 
             // Proof of concept for foreground process, thread independence ...
             System.out.println("enter command...");
-            int response = scan.nextInt();
+            String response = scan.nextLine();
             System.out.println(response);
         }
 

@@ -35,7 +35,7 @@ public class TCPReceiverThread extends Thread {
              	byte[] data = new byte[dataLength];
                 din.readFully(data, 0, dataLength);
                 // call the event factory and pass the new event to node
-                node.onEvent(factory.makeEvent(data),SocketID.socketID(socket));
+                node.onEvent(factory.makeEvent(data),SocketID.socketInetID(socket));
             } catch (SocketException se) {
                 System.out.println(se.getMessage());
                 break;
