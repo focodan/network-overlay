@@ -15,6 +15,7 @@ import java.util.*; //TODO remove/reduce after debugging is finished
 public class Registry implements Node{
     // Registry's personal info
     private int port;
+    private int serverPort;
     
     // Registry's networking services
     private cs455.overlay.transport.TCPServerThread serverThread;
@@ -31,6 +32,9 @@ public class Registry implements Node{
 
     public Registry(int port) throws IOException{
         this.port = port;
+        this.serverPort = -1; // TODO, at this point, my serverPort scheme is only
+                            // needed by MessagingNode. B/C port == serverPort
+                            // after serverThread initialization is complete.
         incomingConnections = new HashMap<String,Connection>();
         messagingNodes = new HashMap<String,Connection>();
         factory = EventFactory.getInstance();
@@ -80,13 +84,22 @@ public class Registry implements Node{
             //throw new IOException("Cannot register duplicate connection: "+c.getID());
         }
     }
-    
+
     //Removes connection c from list of connections, NOT from list of MessagingNodes
     public synchronized void deregisterConnection(Connection c){
         System.out.println("deregisterConnection on "+c.getID());
         incomingConnections.remove(c.getID()); //TODO fails silently, perhaps change
     }
-    
+
+    public /*synchronized*/ void setServerPort(int p){
+        // can only be changed *once* from its sentinel value
+        // this is set in the 'this constructor', so the integrity of this
+        // value is guarded.
+        if(this.serverPort == -1){ 
+            this.serverPort = p;
+        }
+    }
+
     //handles registration request, returns generated response event.
     private Event handleRegRequest(Event regRequest, String connectID){
         Event response = null;
@@ -115,7 +128,8 @@ public class Registry implements Node{
             }
             // if good status --> copy connection to message node list
             if(status == 0){
-                System.out.println("Adding "+regID+" to registry");
+                System.out.println("Adding "+regID+ /* TODO debug */
+                    " to registry. Its serverPort is:"+reg.getServerPort());
                 (incomingConnections.get(regID)).setInetServerPort(reg.getServerPort());
                 messagingNodes.put(regID,incomingConnections.get(regID));
                 additionalInfo += "This is node "+(messagingNodes.size())+" in the registry";
@@ -134,9 +148,13 @@ public class Registry implements Node{
 
         return response;
     }
-    
+
     private void setupOverlay(int degree){
         System.out.println("setupOverlay("+degree+")");
+    }
+    
+    private int getNumberMessagingNodes(){
+        return messagingNodes.size();
     }
 
     /**-------- MAIN ---------------------------------*/

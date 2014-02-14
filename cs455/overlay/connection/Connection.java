@@ -78,7 +78,7 @@ public class Connection {
     }
     
     public void setInetServerPort(int p){
-        return this.inetServerPort = p;
+        this.inetServerPort = p;
     }
     
     //send Event data through TCPSender

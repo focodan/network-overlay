@@ -15,4 +15,5 @@ public interface Node {
     public void registerConnection(Connection c);
     public void deregisterConnection(Connection c);
     public int  getPort();
+    public void setServerPort(int p);
 }

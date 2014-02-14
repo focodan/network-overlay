@@ -2,7 +2,7 @@
    author: Dan Elliott
    course: CS 455
    assignment: HW 1 Network Overlay
-*/ 
+*/
 package cs455.overlay.node;
 
 import cs455.overlay.wireformats.*;
@@ -16,42 +16,46 @@ import java.net.*;
 public class MessagingNode implements Node{
     // Personal info
     private int port;
+    private int serverPort;
     private String IPAddr;
-    
+
     // Registry info
     private int registryPort; // its serversocket
     private String registryIPAddr; // its serversocket
     private Connection registryConnection; // for regular message-passing
-    
+
     // Networking services
     private cs455.overlay.transport.TCPServerThread serverThread;
-    
+
     // Peer messaging nodes
     HashMap<String,Connection> incomingConnections;
     HashMap<String,Connection> messagingNodes;
-    
+
     // Dijkstra's
     // TODO ...
     //HashMap<String,Connection> messagingNodes;
-    
+
     // Tracking info
     private int sendTracker;
     private int receiveTracker;
     private int relayTracker;
     private long sendSummation;
     private long receiveSummation;
-    
+
     public MessagingNode(String registryIP, int registryPort) throws IOException{
         this.registryIPAddr = registryIP;
         this.registryPort = registryPort;
-        
+        this.serverPort = -1; //sentinel used by setServerPort()
         initializeTrackingInfo();
 
         // Data structure for peer messaging nodes
+        incomingConnections = new HashMap<String,Connection>();
         messagingNodes = new HashMap<String,Connection>();  
         
         serverThread = new TCPServerThread(this);
         serverThread.start();
+        
+        System.out.println("my serverPort is: "+this.serverPort); //TODO debug
         
         initializeRegistryConnection();
     }
@@ -72,13 +76,16 @@ public class MessagingNode implements Node{
     private void initializeRegistryConnection() throws IOException {
         // Create socket connection to Registry
         Socket s = new Socket(this.registryIPAddr,this.registryPort);
+        System.out.println(s+" is my socket");
         // Create registry connection as a local abstraction
-        this.registryConnection = new Connection(s,this);
+        this.registryConnection = new Connection(s,(this),this.serverPort);
         // Send registration request
         Event registryRequest = new Register((this.registryConnection).getLocalIP(),
                             (this.registryConnection).getLocalPort(),
                             (this.registryConnection).getLocalServerPort());
+        System.out.println("made registry request event");//TODO debug
         (this.registryConnection).sendData(registryRequest.getBytes());
+        System.out.println("sent registry request event");//TODO debug
     }
 
     public String toString(){
@@ -121,12 +128,24 @@ public class MessagingNode implements Node{
     public synchronized void deregisterConnection(Connection c){
         System.out.println("deregisterConnection unimplemented in MessagingNode");
     }
+    
+    // This may be bad. This may be thread-unsafe. I may need to rethink my life ...
+    // Shrideep, forgive me for my programming sins.
+    // Allows TCPServerThread to set this node's serverPort;
+    public /*synchronized*/ void setServerPort(int p){
+        // can only be changed *once* from its sentinel value
+        // this is set in the 'this constructor', so the integrity of this
+        // value is guarded.
+        if(this.serverPort == -1){ 
+            this.serverPort = p;
+        }
+    }
 
     /** -------- main -------------------------------------*/
     public static void main(String[] args){
         System.out.println("Messaging node main()");
         try{
             MessagingNode m = new MessagingNode("indianapolis",5000);
-        }catch(Exception e){}
+        }catch(Exception e){ System.out.println(e.getMessage()); e.printStackTrace(); }
     }
 }

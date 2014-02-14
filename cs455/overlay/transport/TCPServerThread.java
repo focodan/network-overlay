@@ -24,6 +24,7 @@ public class TCPServerThread extends Thread {
     public TCPServerThread(cs455.overlay.node.Node n, int port) throws IOException{
         this.node = n;
         serve = new ServerSocket(port);
+        node.setServerPort(serve.getLocalPort());
     }
 
     public String toString(){
