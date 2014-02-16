@@ -26,10 +26,11 @@ public class MessagingNode implements Node{
 
     // Networking services
     private cs455.overlay.transport.TCPServerThread serverThread;
-
+    private HashMap<String,Connection> incomingConnections; //TODO phase-out according to notes
+    
     // Peer messaging nodes
-    HashMap<String,Connection> incomingConnections;
-    HashMap<String,Connection> messagingNodes;
+    private LinkedHashMap<String,Connection> messagingNodes;
+    private String[] nodeList; //neighors provided by Registry
 
     // Dijkstra's
     // TODO ...
@@ -50,7 +51,7 @@ public class MessagingNode implements Node{
 
         // Data structure for peer messaging nodes
         incomingConnections = new HashMap<String,Connection>();
-        messagingNodes = new HashMap<String,Connection>();  
+        messagingNodes = new LinkedHashMap<String,Connection>();  
         
         serverThread = new TCPServerThread(this);
         serverThread.start();
@@ -111,7 +112,24 @@ public class MessagingNode implements Node{
                 } catch(Exception er){ er.printStackTrace(); }
                 break;
             }
-            default: /* TODO add error handling */ break;
+            case Protocol.MESSAGING_NODES_LIST: {
+                try{
+                    MessagingNodesList contents = new MessagingNodesList(e.getBytes());
+                    
+                    /*byte status = response.getStatus();
+                    if(status == 0){
+                        System.out.println("Now registered at Registry. Response: "+response.getInfo());
+                    }
+                    else{ //TODO perhaps System.exit(0) upon failure to register, or send additional requests
+                        System.out.println("Unable to register at Registry. Response: "+response.getInfo());
+                    }*/
+                } catch(Exception er){ er.printStackTrace(); }
+                
+                break;
+            }
+            default: {
+                System.out.println("Unable to handle event type: "+eventType);
+            }
         }
     }
 

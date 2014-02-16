@@ -22,7 +22,7 @@ public class Registry implements Node{
 
     // Data structures for managing messaging nodes
     private HashMap<String,Connection> incomingConnections; //all connections
-    private HashMap<String,Connection> messagingNodes; //registered connections
+    private LinkedHashMap<String,Connection> messagingNodes; //registered connections
     private int degree; // the size of the neighborhood for each messaging node
     
     // Link weights and overlay ...
@@ -38,7 +38,7 @@ public class Registry implements Node{
                             // after serverThread initialization is complete.
         this.degree = 4; //default degree is 4 as specified in handout
         this.incomingConnections = new HashMap<String,Connection>();
-        this.messagingNodes = new HashMap<String,Connection>();
+        this.messagingNodes = new LinkedHashMap<String,Connection>();
         this.factory = EventFactory.getInstance();
         this.serverThread = new TCPServerThread(this,port);
         this.serverThread.start();
@@ -187,7 +187,7 @@ public class Registry implements Node{
     // Because my overlay isn't really random or generic, I may want to read 
     // up on the following page about generating random k-regular graphs
     // http://egtheory.wordpress.com/2012/03/29/random-regular-graphs/
-    private void setupOverlay() throws Exception { //TODO genericize
+    private void setupOverlay() throws Exception { //TODO perhaps set adjList as class attribute
         System.out.println("setupOverlay("+getDegree()+")");
         // Overlay is a k-regular graph on n nodes
         int N = getNumberMessagingNodes();
@@ -221,6 +221,11 @@ public class Registry implements Node{
         
         // Nodes informed as ...
         // send messages here via each Connection's sendData method
+        for(int i=0;i<N;i++){ // TODO test this
+            MessagingNodesList message = 
+                new MessagingNodesList(adjList.get(i).toArray(new String[K]));
+            (messagingNodes.get(nodeIDs[i])).sendData(message.getBytes());
+        }
     }
     
 

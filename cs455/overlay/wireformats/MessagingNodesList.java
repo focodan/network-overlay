@@ -12,68 +12,70 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+
 
 public class MessagingNodesList implements Event, Protocol {
     private int type;
     private int stringCount;
-    private ArrayList infoList;
+    private String[] infoList;
 
-    public MessagingNodesList(ArrayList<String> infoList){
+    public MessagingNodesList(String[] infoList){
         this.type = MESSAGING_NODES_LIST;
         this.infoList = infoList;
-        this.stringCount = (this.infoList).size();
+        this.stringCount = (this.infoList).length;
     }
 
     public MessagingNodesList(byte[] marshalledBytes) throws IOException {
-    	/*ByteArrayInputStream baInputStream =	
+    	ByteArrayInputStream baInputStream =	
 				new ByteArrayInputStream(marshalledBytes);	
 		DataInputStream din =	
 				new DataInputStream(new BufferedInputStream(baInputStream));	
 
 		this.type = din.readInt();		
+        this.stringCount = din.readInt();
+        this.infoList = new String[ this.stringCount ];
 
-		int identifierLength = din.readInt();	
-		byte[] identifierBytes = new byte[identifierLength];	
-		din.readFully(identifierBytes);	
-
-		this.IPaddr = new String(identifierBytes);	
-
-		this.port = din.readInt();
-		
-		this.serverPort = din.readInt();	
-
+        for(int i=0; i < this.stringCount; i++){
+            int identifierLength = din.readInt();	
+		    byte[] identifierBytes = new byte[identifierLength];	
+		    din.readFully(identifierBytes);	
+		    infoList[i] = new String(identifierBytes);
+        }
+        
 		baInputStream.close();	
-		din.close();*/
+		din.close();
     }
 
     public byte[] getBytes() throws IOException { 
-        /*byte[] marshalledBytes = null;	
+        byte[] marshalledBytes = null;	
 		ByteArrayOutputStream baOutputStream = new ByteArrayOutputStream();	
 		DataOutputStream dout =
 				new DataOutputStream(new BufferedOutputStream(baOutputStream));
 
 		dout.writeInt(this.type);
+        dout.writeInt(this.stringCount);
 
-		byte[] identifierBytes = (this.IPaddr).getBytes();
-		int elementLength = identifierBytes.length;
-		dout.writeInt(elementLength);
-		dout.write(identifierBytes);
-
-		dout.writeInt(this.port);
-		dout.writeInt(this.serverPort);
+        for(int i=0; i<this.stringCount; i++){
+            byte[] identifierBytes = (infoList[i]).getBytes();
+		    int elementLength = identifierBytes.length;
+		    dout.writeInt(elementLength);
+		    dout.write(identifierBytes);
+        }
 
 		dout.flush();
 		marshalledBytes = baOutputStream.toByteArray();
 
 		baOutputStream.close();
 		dout.close();
-		return marshalledBytes;*/
-		return null;
+		return marshalledBytes;
     }
 
     public int getType(){
         return this.type;
+    }
+    
+    public String[] getInfoList(){ //TODO test
+         return (String[]) (this.infoList).clone();
     }
 
     public String toString(){

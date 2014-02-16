@@ -82,7 +82,7 @@ public class Connection {
     }
     
     //send Event data through TCPSender
-    public boolean sendData(byte[] bytes){
+    public boolean sendData(byte[] bytes){ //TODO consider throwing
         boolean status = true;
         try{
             sender.sendData(bytes);
