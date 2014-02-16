@@ -9,8 +9,8 @@ import cs455.overlay.transport.*;
 import cs455.overlay.wireformats.*;
 import cs455.overlay.connection.*;
 import cs455.overlay.util.*;
-import java.io.*; //TODO remove/reduce after debugging is finished
-import java.util.*; //TODO remove/reduce after debugging is finished
+import java.io.*;
+import java.util.*;
 
 public class Registry implements Node{
     // Registry's personal info
@@ -21,8 +21,9 @@ public class Registry implements Node{
     private cs455.overlay.transport.TCPServerThread serverThread;
 
     // Data structures for managing messaging nodes
-    HashMap<String,Connection> incomingConnections;
-    HashMap<String,Connection> messagingNodes;
+    private HashMap<String,Connection> incomingConnections; //all connections
+    private HashMap<String,Connection> messagingNodes; //registered connections
+    private int degree; // the size of the neighborhood for each messaging node
     
     // Link weights and overlay ...
     // ...
@@ -35,11 +36,12 @@ public class Registry implements Node{
         this.serverPort = -1; // TODO, at this point, my serverPort scheme is only
                             // needed by MessagingNode. B/C port == serverPort
                             // after serverThread initialization is complete.
-        incomingConnections = new HashMap<String,Connection>();
-        messagingNodes = new HashMap<String,Connection>();
-        factory = EventFactory.getInstance();
-        serverThread = new TCPServerThread(this,port);
-        serverThread.start();
+        this.degree = 4; //default degree is 4 as specified in handout
+        this.incomingConnections = new HashMap<String,Connection>();
+        this.messagingNodes = new HashMap<String,Connection>();
+        this.factory = EventFactory.getInstance();
+        this.serverThread = new TCPServerThread(this,port);
+        this.serverThread.start();
     }
     
     public int getPort(){
@@ -48,6 +50,15 @@ public class Registry implements Node{
 
     public String toString(){
         return "Registry class";
+    }
+    
+    public /*synchronized*/ void setServerPort(int p){
+        // can only be changed *once* from its sentinel value
+        // this is set in the 'this constructor', so the integrity of this
+        // value is guarded.
+        if(this.serverPort == -1){ 
+            this.serverPort = p;
+        }
     }
 
     public synchronized void onEvent(Event e, String connectID){
@@ -73,6 +84,8 @@ public class Registry implements Node{
         }
     }
 
+    /** ---------- REGISTRATION -------------------------*/
+
     //Adds connection c to the list of connections, NOT to the list of MessagingNodes
     public synchronized void registerConnection(Connection c) {
         System.out.println("registerConnection on "+c.getID()+" in Registry");
@@ -89,15 +102,6 @@ public class Registry implements Node{
     public synchronized void deregisterConnection(Connection c){
         System.out.println("deregisterConnection on "+c.getID());
         incomingConnections.remove(c.getID()); //TODO fails silently, perhaps change
-    }
-
-    public /*synchronized*/ void setServerPort(int p){
-        // can only be changed *once* from its sentinel value
-        // this is set in the 'this constructor', so the integrity of this
-        // value is guarded.
-        if(this.serverPort == -1){ 
-            this.serverPort = p;
-        }
     }
 
     //handles registration request, returns generated response event.
@@ -148,14 +152,78 @@ public class Registry implements Node{
 
         return response;
     }
+    
+    /** ------- OVERLAY -----------------------------------*/
 
-    private void setupOverlay(int degree){
-        System.out.println("setupOverlay("+degree+")");
+    // For a k-regular graph on n nodes, these two methods provide k and n:
+    private int getNumberMessagingNodes(){
+        return messagingNodes.size(); //n
+    }
+    private int getDegree(){
+        return this.degree; //k
+    }
+
+    // neccessary and sufficient conditions for overlay to exist
+    private boolean overlayExistence(int n, int k){
+        if( (n >= (k+1)) && ( (n*k)%2==0 )) return true;
+        else return false;
+    }
+
+    private String[] getMessagingNodeKeys(){
+        return (messagingNodes.keySet()).toArray(new String[getNumberMessagingNodes()]);
+    }
+
+    // looks up host:port in registry, and returns host:ServerSocketPort
+    private String getPeerInfo(String key){
+        Connection c = messagingNodes.get(key);
+        return SocketID.socketID(c.getInetIP(),c.getInetServerPort());
+    }
+
+    private void setupOverlay(int degree) throws Exception {
+        this.degree = degree;
+        setupOverlay();
+    }
+
+    // Because my overlay isn't really random or generic, I may want to read 
+    // up on the following page about generating random k-regular graphs
+    // http://egtheory.wordpress.com/2012/03/29/random-regular-graphs/
+    private void setupOverlay() throws Exception { //TODO genericize
+        System.out.println("setupOverlay("+getDegree()+")");
+        // Overlay is a k-regular graph on n nodes
+        int N = getNumberMessagingNodes();
+        int K = getDegree();
+        String[] nodeIDs = getMessagingNodeKeys(); // IDs for nodes
+
+        // Stored as adjacency list -- array list of array lists
+        ArrayList<ArrayList<String>> adjList = new ArrayList<ArrayList<String>>(N);
+        for(int i=0;i<N;i++){ adjList.add( new ArrayList<String>(K)); }
+        
+        // Can overlay exist?
+        if(!(overlayExistence(N,K))){
+            throw new Exception("Overlay cannot be created. At least one of "+
+                "these properties fails:\n 1. Nodes > Connections +1\n 2. "+
+                "Nodes*Connections is even");
+        }
+        
+        // Constructed as ...
+        for(int i=0;i<N;i++){
+            (adjList.get(i)).add( getPeerInfo(nodeIDs[(i+1)%N]) ); //forward 1
+            (adjList.get(i)).add( getPeerInfo(nodeIDs[(i+(N-1))%N]) ); //back 1
+            (adjList.get(i)).add( getPeerInfo(nodeIDs[(i+2)%N]) ); // forward 2
+            (adjList.get(i)).add( getPeerInfo(nodeIDs[(i+(N-2))%N]) ); // back 2
+            //TODO remove after debugging
+            System.out.println("Adding the following connections for node:"+getPeerInfo(nodeIDs[(i)]));
+            System.out.println("\t"+getPeerInfo(nodeIDs[(i+1)%N]));
+            System.out.println("\t"+getPeerInfo(nodeIDs[(i+(N-1))%N]));
+            System.out.println("\t"+getPeerInfo(nodeIDs[(i+2)%N]));
+            System.out.println("\t"+getPeerInfo(nodeIDs[(i+(N-2))%N]));
+        }
+        
+        // Nodes informed as ...
+        // send messages here via each Connection's sendData method
     }
     
-    private int getNumberMessagingNodes(){
-        return messagingNodes.size();
-    }
+
 
     /**-------- MAIN ---------------------------------*/
 
@@ -192,12 +260,18 @@ public class Registry implements Node{
                 ;
             }
             else if(responseArgs[0].equals(options[2])){
-                if(responseArgs.length>1){
-                    Integer nodeDegree = new Integer(responseArgs[1]);
-                    reg.setupOverlay(nodeDegree);
+                try{
+                    if(responseArgs.length>1){
+                        Integer nodeDegree = new Integer(responseArgs[1]);
+                        reg.setupOverlay(nodeDegree);
+                    }
+                    else{
+                        reg.setupOverlay();
+                    }
                 }
-                else{
-                    System.out.println("Needs integer argument");
+                catch(Exception o){
+                    System.out.println(o.getMessage());
+                    o.printStackTrace();
                 }
             }
             else if(responseArgs[0].equals(options[3])){
