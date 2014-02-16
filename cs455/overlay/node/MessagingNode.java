@@ -5,6 +5,7 @@
 */
 package cs455.overlay.node;
 
+import cs455.overlay.util.*;
 import cs455.overlay.wireformats.*;
 import cs455.overlay.transport.*;
 import cs455.overlay.connection.*;
@@ -15,9 +16,10 @@ import java.net.*;
 
 public class MessagingNode implements Node{
     // Personal info
-    private int port;
+    private int port;//TODO phase-out according to notes
     private int serverPort;
     private String IPAddr;
+    private String ID; // IPAddr:serverPort
 
     // Registry info
     private int registryPort; // its serversocket
@@ -57,8 +59,11 @@ public class MessagingNode implements Node{
         serverThread.start();
         
         System.out.println("my serverPort is: "+this.serverPort); //TODO debug
-        
+
+        //TODO this.IPaddr set here, perhaps move to TCPServerThread 
         initializeRegistryConnection();
+
+        this.ID = SocketID.socketID(this.IPAddr,this.serverPort);
     }
     
     public int getPort(){ 
@@ -80,6 +85,7 @@ public class MessagingNode implements Node{
         System.out.println(s+" is my socket");
         // Create registry connection as a local abstraction
         this.registryConnection = new Connection(s,(this),this.serverPort);
+        this.IPAddr = this.registryConnection.getLocalIP();
         // Send registration request
         Event registryRequest = new Register((this.registryConnection).getLocalIP(),
                             (this.registryConnection).getLocalPort(),
@@ -115,14 +121,11 @@ public class MessagingNode implements Node{
             case Protocol.MESSAGING_NODES_LIST: {
                 try{
                     MessagingNodesList contents = new MessagingNodesList(e.getBytes());
-                    
-                    /*byte status = response.getStatus();
-                    if(status == 0){
-                        System.out.println("Now registered at Registry. Response: "+response.getInfo());
-                    }
-                    else{ //TODO perhaps System.exit(0) upon failure to register, or send additional requests
-                        System.out.println("Unable to register at Registry. Response: "+response.getInfo());
-                    }*/
+                    this.nodeList = contents.getInfoList();
+                    /* decide how to send requests without duplicate connections */
+                    /* perhaps this should be a new thread */
+                    connectToNeighbors();
+
                 } catch(Exception er){ er.printStackTrace(); }
                 
                 break;
@@ -147,15 +150,31 @@ public class MessagingNode implements Node{
         System.out.println("deregisterConnection unimplemented in MessagingNode");
     }
     
-    // This may be bad. This may be thread-unsafe. I may need to rethink my life ...
-    // Shrideep, forgive me for my programming sins.
     // Allows TCPServerThread to set this node's serverPort;
-    public /*synchronized*/ void setServerPort(int p){
-        // can only be changed *once* from its sentinel value
-        // this is set in the 'this constructor', so the integrity of this
-        // value is guarded.
+    public void setServerPort(int p){
         if(this.serverPort == -1){ 
             this.serverPort = p;
+        }
+    }
+
+    /** -------- overlay ----------------------------------*/
+    // Register Connections to neighbors in infoList 
+    // Scheme is to only send requests to peers with an ID of lesser lexographic
+    // value, so that I avoid duplicate or self connections
+    private void connectToNeighbors(){
+        for(int i=0;i<nodeList.length;i++){
+            if((this.ID).compareTo(nodeList[i]) > 0){
+                 try{
+                     System.out.println("Connecting to peer: "+SocketID.getIP(nodeList[i])
+                         +" "+SocketID.getPort(nodeList[i]));
+                     Socket s = new Socket(SocketID.getIP(nodeList[i]),SocketID.getPort(nodeList[i]));                     
+                     System.out.println(s+" is my socket");
+                     registerConnection(new Connection(s,(this),this.serverPort));
+                 }catch(IOException uhOh){
+                     System.out.println(uhOh.getMessage());
+                     uhOh.printStackTrace();
+                 }
+            }
         }
     }
 
@@ -163,7 +182,7 @@ public class MessagingNode implements Node{
     public static void main(String[] args){
         System.out.println("Messaging node main()");
         try{
-            MessagingNode m = new MessagingNode("dover",5000);
+            MessagingNode m = new MessagingNode("pikes",5000);
         }catch(Exception e){ System.out.println(e.getMessage()); e.printStackTrace(); }
     }
 }

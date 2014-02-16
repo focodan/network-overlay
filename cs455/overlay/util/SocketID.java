@@ -20,15 +20,19 @@ public class SocketID {
     public static String socketID(String IP, int port){
         return new String(IP + ":" + port);
     }
-    /* possibly unneeded
+
     public static String getIP(String socketID){
-        return (socketID.split(":")).get(0);
+        String ip = (socketID.split(":"))[0];
+        String[] ipParts = ip.split("/");
+        if(ipParts.length > 1){ ip = ipParts[1]; }
+        else{ ip = ipParts[0]; } 
+        return ip;
     }
     
-    public static String getPort(String socketID){
-        return (socketID.split(":")).get(0);
+    public static Integer getPort(String socketID){
+        return new Integer((socketID.split(":"))[1]);
     }
-    */
+
     public String toString(){
         return "SocketID class";
     }
