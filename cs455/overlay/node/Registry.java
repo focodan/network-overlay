@@ -262,7 +262,7 @@ public class Registry implements Node{
         }
 
         // Send messageNodeLists
-        for(int i=0;i<N;i++){ // TODO test this
+        for(int i=0;i<N;i++){
             String[] list = new String[K];
             for(int j=0;j<K;j++){
                 list[j] = new String(((adjList.get(i)).get(j)).getDest());
@@ -271,18 +271,19 @@ public class Registry implements Node{
                 new MessagingNodesList(list);
             (messagingNodes.get(nodeIDs[i])).sendData(message.getBytes());
         }
-        
+
         // Send linkWeights
-        for(int i=0;i<N;i++){ // TODO test this
-            Edge[] list = new Edge[K];
+        Edge[] list = new Edge[N*K]; // Pseudo-2D array, bby!
+        for(int i=0;i<N;i++){
             for(int j=0;j<K;j++){
-                list[j] = (adjList.get(i)).get(j);
+                list[i*K+j] = (adjList.get(i)).get(j);
             }
-            LinkWeights message = 
-                new LinkWeights(list);
+        }
+        LinkWeights message = new LinkWeights(list);
+        for(int i=0;i<N;i++){
             (messagingNodes.get(nodeIDs[i])).sendData(message.getBytes());
         }
-        
+
     }
     
 

@@ -74,6 +74,10 @@ public class LinkWeights implements Event, Protocol {
     public int getType(){
         return this.type;
     }
+    
+    public Edge[] getLinkWeights(){
+        return this.links;
+    }
 
     public String toString(){
         return "LinkWeights class";

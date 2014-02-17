@@ -32,7 +32,9 @@ public class MessagingNode implements Node{
     
     // Peer messaging nodes
     private LinkedHashMap<String,Connection> messagingNodes;
-    private String[] nodeList; //neighors provided by Registry
+    private String[] nodeList; //peer IDs of neighbors
+    private Edge[] edgeList; //contains nodeIDs and weight for each edge in entire
+                            // overlay graph
 
     // Dijkstra's
     // TODO ...
@@ -122,12 +124,23 @@ public class MessagingNode implements Node{
                 try{
                     MessagingNodesList contents = new MessagingNodesList(e.getBytes());
                     this.nodeList = contents.getInfoList();
-                    /* decide how to send requests without duplicate connections */
-                    /* perhaps this should be a new thread */
-                    connectToNeighbors();
-
+                    connectToNeighbors(); //Connect to neighbors
                 } catch(Exception er){ er.printStackTrace(); }
-                
+                break;
+            }
+            case Protocol.Link_Weights: {
+                try{
+                    /*MessagingNodesList contents = new MessagingNodesList(e.getBytes());
+                    this.nodeList = contents.getInfoList();
+                    connectToNeighbors(); //Connect to neighbors*/
+                    LinkWeights contents = new LinkWeights(e.getBytes());
+                    this.edgeList = contents.getLinkWeights();
+                    //TODO debug
+                    System.out.println("My edge list:");
+                    for(int i=0;i<this.edgeList.length;i++){
+                        System.out.println(edgeList[i]);
+                    }
+                } catch(Exception er){ er.printStackTrace(); }
                 break;
             }
             default: {

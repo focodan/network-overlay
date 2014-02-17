@@ -5,6 +5,7 @@
 */ 
 package cs455.overlay.connection;
 
+import java.io.*;
 /*
 import cs455.overlay.transport.*;
 import cs455.overlay.wireformats.*;
@@ -36,9 +37,17 @@ public class Edge {
     
     // Takes "hostA:portA hostB:portB Weight" and turns it into a proper
     // edge
-    public Edge(String compressed){
-        //TODO implement
-        this("a","b",1);
+    //TODO perhaps have this throw
+    public Edge(String compressed) throws IOException {
+        String[] parts = compressed.split(" ");
+        if(parts.length != 3){
+            throw new IOException("Edge must be created with the format:"+
+                "\"hostA:portA hostB:portB Weight\"");
+        }
+        this.source = parts[0];
+        this.dest = parts[1];
+        this.weight = new Integer(parts[2]);
+        
     }
 
     public String getSrc(){
