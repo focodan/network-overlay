@@ -238,22 +238,28 @@ public class Registry implements Node{
                 //TODO make undirected
             }
         }
-        
+
         // Nodes informed as ...
         // send messages here via each Connection's sendData method
         for(int i=0;i<N;i++){ // TODO test this
             String[] list = new String[K];
             for(int j=0;j<K;j++){
                 list[j] = new String(((adjList.get(i)).get(j)).getDest());
-                /* for link message, like this:
-                list[j] = new String(((adjList.get(i)).get(j)).getSrc()+
-                    " "+((adjList.get(i)).get(j)).getDest()+" "+
-                    ((adjList.get(i)).get(j)).getWeight()
-                    );
-                */
             }
             MessagingNodesList message = 
-                new MessagingNodesList(adjList.get(i).toArray(new String[K]));
+                new MessagingNodesList(list);
+            (messagingNodes.get(nodeIDs[i])).sendData(message.getBytes());
+        }
+        
+        // Nodes informed as ...
+        // send messages here via each Connection's sendData method
+        for(int i=0;i<N;i++){ // TODO test this
+            Edge[] list = new Edge[K];
+            for(int j=0;j<K;j++){
+                list[j] = (adjList.get(i)).get(j);
+            }
+            LinkWeights message = 
+                new LinkWeights(list);
             (messagingNodes.get(nodeIDs[i])).sendData(message.getBytes());
         }
         

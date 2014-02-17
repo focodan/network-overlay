@@ -5,6 +5,7 @@
 */ 
 package cs455.overlay.wireformats;
 
+import cs455.overlay.connection.Edge;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -15,6 +16,9 @@ import java.io.IOException;
 
 public class LinkWeights implements Event {
     private int type;
+
+    public LinkWeights(Edge[] links){
+    }
 
     public LinkWeights(byte[] marshalledBytes) throws IOException { 
     }
