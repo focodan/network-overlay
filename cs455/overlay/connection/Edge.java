@@ -33,6 +33,13 @@ public class Edge {
     public Edge(String src, String dst){
         this(src,dst,-1);
     }
+    
+    // Takes "hostA:portA hostB:portB Weight" and turns it into a proper
+    // edge
+    public Edge(String compressed){
+        //TODO implement
+        this("a","b",1);
+    }
 
     public String getSrc(){
         return this.source;
@@ -45,6 +52,10 @@ public class Edge {
     }
     public void setWeight(int w){
         if(getWeight()<0 && w >= 0) this.weight = w;
+    }
+    
+    public boolean isWeightSet(){
+        return (this.weight >= 0);
     }
 
     public String toString(){

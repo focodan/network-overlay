@@ -52,10 +52,7 @@ public class Registry implements Node{
         return "Registry class";
     }
     
-    public /*synchronized*/ void setServerPort(int p){
-        // can only be changed *once* from its sentinel value
-        // this is set in the 'this constructor', so the integrity of this
-        // value is guarded.
+    public void setServerPort(int p){
         if(this.serverPort == -1){ 
             this.serverPort = p;
         }
@@ -132,10 +129,12 @@ public class Registry implements Node{
             }
             // if good status --> copy connection to message node list
             if(status == 0){
+                // A node's ID should always be host:serverPort in registry
+                String regIDKey = SocketID.socketID(reg.getIPAddr(),reg.getServerPort());
                 System.out.println("Adding "+regID+ /* TODO debug */
                     " to registry. Its serverPort is:"+reg.getServerPort());
                 (incomingConnections.get(regID)).setInetServerPort(reg.getServerPort());
-                messagingNodes.put(regID,incomingConnections.get(regID));
+                messagingNodes.put(regIDKey,incomingConnections.get(regID));
                 additionalInfo += "This is node "+(messagingNodes.size())+" in the registry";
             }
             // create Response object to return
@@ -220,11 +219,13 @@ public class Registry implements Node{
             (adjList.get(i)).add( new Edge(getPeerInfo(nodeIDs[i]),
                                     getPeerInfo(nodeIDs[(i+(N-2))%N]) )); // back 2
             //TODO remove after debugging
-            System.out.println("Adding the following connections for node:"+getPeerInfo(nodeIDs[(i)]));
+            System.out.println("Adding the following connections for node:"+
+                                getPeerInfo(nodeIDs[(i)]));
             System.out.println("\t"+getPeerInfo(nodeIDs[(i+1)%N]));
             System.out.println("\t"+getPeerInfo(nodeIDs[(i+(N-1))%N]));
             System.out.println("\t"+getPeerInfo(nodeIDs[(i+2)%N]));
             System.out.println("\t"+getPeerInfo(nodeIDs[(i+(N-2))%N]));
+            System.out.println();
         }
         
         // Add weights to edges, randomly in range [1,10]
@@ -232,15 +233,35 @@ public class Registry implements Node{
         int min = 1;
         for(int i=0;i<N;i++){
             for(int j=0;j<K;j++){
-                //for testing, this can be 1
-                int r = 1; //rand.nextInt((max - min) + 1) + min; 
-                ((adjList.get(i)).get(j)).setWeight(r);
-                //TODO make undirected
+                // if node hasn't been dealt with
+                if(!((adjList.get(i)).get(j)).isWeightSet()){
+                    //for testing, this can be 1
+                    int r = rand.nextInt((max - min) + 1) + min; 
+                    ((adjList.get(i)).get(j)).setWeight(r);
+                    System.out.println("Adding Link "+((adjList.get(i)).get(j)));
+                    //Add its friend
+                    for(int a=0;a<N;a++){
+                        // We've found our dest
+                        //System.out.println("\tIs this a winner destination?"
+                        //    +nodeIDs[a]+" "+/*.equals*/(((adjList.get(i)).get(j)).getDest()));
+                        if(nodeIDs[a].equals(((adjList.get(i)).get(j)).getDest())){
+                            //System.out.println("\tdest:"+((adjList.get(i)).get(j)).getDest());
+                            // 'a' is our magic index
+                            for(int b=0;b<K;b++){
+                                // We've found our source
+                                if(adjList.get(a).get(b).getDest().equals(((adjList.get(i)).get(j)).getSrc())){
+                                    adjList.get(a).get(b).setWeight(r);
+                                    System.out.println("Adding Link: "+adjList.get(a).get(b));
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
             }
         }
 
-        // Nodes informed as ...
-        // send messages here via each Connection's sendData method
+        // Send messageNodeLists
         for(int i=0;i<N;i++){ // TODO test this
             String[] list = new String[K];
             for(int j=0;j<K;j++){
@@ -251,8 +272,7 @@ public class Registry implements Node{
             (messagingNodes.get(nodeIDs[i])).sendData(message.getBytes());
         }
         
-        // Nodes informed as ...
-        // send messages here via each Connection's sendData method
+        // Send linkWeights
         for(int i=0;i<N;i++){ // TODO test this
             Edge[] list = new Edge[K];
             for(int j=0;j<K;j++){

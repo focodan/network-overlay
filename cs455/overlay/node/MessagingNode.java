@@ -182,7 +182,7 @@ public class MessagingNode implements Node{
     public static void main(String[] args){
         System.out.println("Messaging node main()");
         try{
-            MessagingNode m = new MessagingNode("pikes",5000);
+            MessagingNode m = new MessagingNode("richmond",5000);
         }catch(Exception e){ System.out.println(e.getMessage()); e.printStackTrace(); }
     }
 }
