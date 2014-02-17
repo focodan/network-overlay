@@ -189,14 +189,18 @@ public class Registry implements Node{
     // http://egtheory.wordpress.com/2012/03/29/random-regular-graphs/
     private void setupOverlay() throws Exception { //TODO perhaps set adjList as class attribute
         System.out.println("setupOverlay("+getDegree()+")");
+        
+        //for random generation of link weights
+        Random rand = new Random();
+        
         // Overlay is a k-regular graph on n nodes
         int N = getNumberMessagingNodes();
         int K = getDegree();
         String[] nodeIDs = getMessagingNodeKeys(); // IDs for nodes
 
         // Stored as adjacency list -- array list of array lists
-        ArrayList<ArrayList<String>> adjList = new ArrayList<ArrayList<String>>(N);
-        for(int i=0;i<N;i++){ adjList.add( new ArrayList<String>(K)); }
+        ArrayList<ArrayList<Edge>> adjList = new ArrayList<ArrayList<Edge>>(N);
+        for(int i=0;i<N;i++){ adjList.add( new ArrayList<Edge>(K)); }
         
         // Can overlay exist?
         if(!(overlayExistence(N,K))){
@@ -207,10 +211,14 @@ public class Registry implements Node{
         
         // Constructed as ...
         for(int i=0;i<N;i++){
-            (adjList.get(i)).add( getPeerInfo(nodeIDs[(i+1)%N]) ); //forward 1
-            (adjList.get(i)).add( getPeerInfo(nodeIDs[(i+(N-1))%N]) ); //back 1
-            (adjList.get(i)).add( getPeerInfo(nodeIDs[(i+2)%N]) ); // forward 2
-            (adjList.get(i)).add( getPeerInfo(nodeIDs[(i+(N-2))%N]) ); // back 2
+            (adjList.get(i)).add( new Edge(getPeerInfo(nodeIDs[i]),
+                                getPeerInfo(nodeIDs[(i+1)%N]) )); //forward 1
+            (adjList.get(i)).add( new Edge(getPeerInfo(nodeIDs[i]),
+                                getPeerInfo(nodeIDs[(i+(N-1))%N]) )); //back 1
+            (adjList.get(i)).add( new Edge(getPeerInfo(nodeIDs[i]),
+                                    getPeerInfo(nodeIDs[(i+2)%N]) )); // forward 2
+            (adjList.get(i)).add( new Edge(getPeerInfo(nodeIDs[i]),
+                                    getPeerInfo(nodeIDs[(i+(N-2))%N]) )); // back 2
             //TODO remove after debugging
             System.out.println("Adding the following connections for node:"+getPeerInfo(nodeIDs[(i)]));
             System.out.println("\t"+getPeerInfo(nodeIDs[(i+1)%N]));
@@ -219,13 +227,36 @@ public class Registry implements Node{
             System.out.println("\t"+getPeerInfo(nodeIDs[(i+(N-2))%N]));
         }
         
+        // Add weights to edges, randomly in range [1,10]
+        int max = 10;
+        int min = 1;
+        for(int i=0;i<N;i++){
+            for(int j=0;j<K;j++){
+                //for testing, this can be 1
+                int r = 1; //rand.nextInt((max - min) + 1) + min; 
+                ((adjList.get(i)).get(j)).setWeight(r);
+                //TODO make undirected
+            }
+        }
+        
         // Nodes informed as ...
         // send messages here via each Connection's sendData method
         for(int i=0;i<N;i++){ // TODO test this
+            String[] list = new String[K];
+            for(int j=0;j<K;j++){
+                list[j] = new String(((adjList.get(i)).get(j)).getDest());
+                /* for link message, like this:
+                list[j] = new String(((adjList.get(i)).get(j)).getSrc()+
+                    " "+((adjList.get(i)).get(j)).getDest()+" "+
+                    ((adjList.get(i)).get(j)).getWeight()
+                    );
+                */
+            }
             MessagingNodesList message = 
                 new MessagingNodesList(adjList.get(i).toArray(new String[K]));
             (messagingNodes.get(nodeIDs[i])).sendData(message.getBytes());
         }
+        
     }
     
 

@@ -169,7 +169,7 @@ public class MessagingNode implements Node{
                          +" "+SocketID.getPort(nodeList[i]));
                      Socket s = new Socket(SocketID.getIP(nodeList[i]),SocketID.getPort(nodeList[i]));                     
                      System.out.println(s+" is my socket");
-                     registerConnection(new Connection(s,(this),this.serverPort));
+                     new Connection(s,(this),this.serverPort);
                  }catch(IOException uhOh){
                      System.out.println(uhOh.getMessage());
                      uhOh.printStackTrace();
