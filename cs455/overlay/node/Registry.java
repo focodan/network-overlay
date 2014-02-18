@@ -64,7 +64,6 @@ public class Registry implements Node{
         String ID;
         switch(eventType){
             case Protocol.REGISTER_REQUEST: {
-
                 //call handleRegRequest to get response
                 // if response is non-null, send it via connectID's Connection
                 Event response = handleRegRequest(e, connectID);
@@ -272,7 +271,7 @@ public class Registry implements Node{
             (messagingNodes.get(nodeIDs[i])).sendData(message.getBytes());
         }
 
-        // Send linkWeights
+        // Send linkWeights //TODO move to diff method as in spec
         Edge[] list = new Edge[N*K]; // Pseudo-2D array, bby!
         for(int i=0;i<N;i++){
             for(int j=0;j<K;j++){
