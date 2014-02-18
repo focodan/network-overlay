@@ -9,6 +9,7 @@ import cs455.overlay.util.*;
 import cs455.overlay.wireformats.*;
 import cs455.overlay.transport.*;
 import cs455.overlay.connection.*;
+import cs455.overlay.dijkstra.*;
 import java.io.*;
 import java.util.*;
 import java.net.*;
@@ -37,8 +38,7 @@ public class MessagingNode implements Node{
                             // overlay graph
 
     // Dijkstra's
-    // TODO ...
-    //HashMap<String,Connection> messagingNodes;
+    Dijkstra dijk;
 
     // Tracking info
     private int sendTracker;
@@ -58,14 +58,16 @@ public class MessagingNode implements Node{
         messagingNodes = new LinkedHashMap<String,Connection>();  
         
         serverThread = new TCPServerThread(this);
-        serverThread.start();
+        serverThread.start(); //TODO move out of constructor
         
         System.out.println("my serverPort is: "+this.serverPort); //TODO debug
 
         //TODO this.IPaddr set here, perhaps move to TCPServerThread 
-        initializeRegistryConnection();
+        initializeRegistryConnection(); //TODO move out of constructor
 
         this.ID = SocketID.socketID(this.IPAddr,this.serverPort);
+        
+        dijk = null; // initialized by Link_Weight message in onEvent()
     }
     
     public int getPort(){ 
@@ -140,6 +142,15 @@ public class MessagingNode implements Node{
                     for(int i=0;i<this.edgeList.length;i++){
                         System.out.println(edgeList[i]);
                     }
+                    // setup Dijkstra and pre-compute all shortest paths
+                    dijk = new Dijkstra((edgeList.length/nodeList.length), //N
+                            nodeList.length, // K
+                            this.edgeList, // edges
+                            this.ID); // source
+                    dijk.initialize();
+                    dijk.execute();
+                    dijk.printAllShortestPathsFancy();
+                    
                 } catch(Exception er){ er.printStackTrace(); }
                 break;
             }
@@ -195,7 +206,7 @@ public class MessagingNode implements Node{
     public static void main(String[] args){
         System.out.println("Messaging node main()");
         try{
-            MessagingNode m = new MessagingNode("richmond",5000);
+            MessagingNode m = new MessagingNode("jefferson-city",5000);
         }catch(Exception e){ System.out.println(e.getMessage()); e.printStackTrace(); }
     }
 }

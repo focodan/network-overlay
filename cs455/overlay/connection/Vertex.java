@@ -2,7 +2,7 @@
    author: Dan Elliott
    course: CS 455
    assignment: HW 1 Network Overlay
-*/ 
+*/
 package cs455.overlay.connection;
 
 import java.io.*;
@@ -38,8 +38,14 @@ public class Vertex implements Comparable<Vertex> {
     public void setPrev(String prev){
         this.prev = prev;
     }
+    public String getPrev(){
+        return this.prev;
+    }
     public int getMinDist(){
         return minDist;
+    }
+    public String getID(){
+        return ID;
     }
     
     public int compareTo(Vertex other) {
