@@ -38,7 +38,7 @@ public class MessagingNode implements Node{
                             // overlay graph
 
     // Dijkstra's
-    Dijkstra dijk;
+    private Dijkstra dijk;
 
     // Tracking info
     private int sendTracker;

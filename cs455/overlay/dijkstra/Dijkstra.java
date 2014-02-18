@@ -11,14 +11,14 @@ import cs455.overlay.connection.*;
 
 public class Dijkstra {
     //Graph information of k-regular graph
-    final int infin = Integer.MAX_VALUE;
-    int N; // number of nodes
-    int K; // degree of each node
-    String source;
-    Edge[] edges; //raw form of graph
-    HashMap<String,Vertex> vertices; // vertex set
-    HashMap<String,ArrayList<Edge>> graph; //adjacency list
-    PriorityQueue<Vertex> queue;
+    private final int infin = Integer.MAX_VALUE;
+    private int N; // number of nodes
+    private int K; // degree of each node
+    private String source;
+    private Edge[] edges; //raw form of graph
+    private HashMap<String,Vertex> vertices; // vertex set
+    private HashMap<String,ArrayList<Edge>> graph; //adjacency list
+    private PriorityQueue<Vertex> queue;
 
     //Shortest paths
     private Dijkstra(){} // Ban default construction

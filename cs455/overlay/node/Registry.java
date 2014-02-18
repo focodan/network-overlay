@@ -25,8 +25,8 @@ public class Registry implements Node{
     private LinkedHashMap<String,Connection> messagingNodes; //registered connections
     private int degree; // the size of the neighborhood for each messaging node
     
-    // Link weights and overlay ...
-    // ...
+    // Adjacency-List Graph for overlay and link weights
+    private ArrayList<ArrayList<Edge>> adjList;
     
     // For making events
     EventFactory factory;
@@ -41,7 +41,8 @@ public class Registry implements Node{
         this.messagingNodes = new LinkedHashMap<String,Connection>();
         this.factory = EventFactory.getInstance();
         this.serverThread = new TCPServerThread(this,port);
-        this.serverThread.start();
+        this.serverThread.start(); // TODO move out of constructor
+        ArrayList<ArrayList<Edge>> adjList = null; // initialized in setupOverlay
     }
     
     public int getPort(){
@@ -197,7 +198,7 @@ public class Registry implements Node{
         String[] nodeIDs = getMessagingNodeKeys(); // IDs for nodes
 
         // Stored as adjacency list -- array list of array lists
-        ArrayList<ArrayList<Edge>> adjList = new ArrayList<ArrayList<Edge>>(N);
+        /*ArrayList<ArrayList<Edge>>*/ this.adjList = new ArrayList<ArrayList<Edge>>(N);
         for(int i=0;i<N;i++){ adjList.add( new ArrayList<Edge>(K)); }
         
         // Can overlay exist?
@@ -271,7 +272,7 @@ public class Registry implements Node{
             (messagingNodes.get(nodeIDs[i])).sendData(message.getBytes());
         }
 
-        // Send linkWeights //TODO move to diff method as in spec
+        /*// Send linkWeights //TODO move to diff method as in spec
         Edge[] list = new Edge[N*K]; // Pseudo-2D array, bby!
         for(int i=0;i<N;i++){
             for(int j=0;j<K;j++){
@@ -281,10 +282,46 @@ public class Registry implements Node{
         LinkWeights message = new LinkWeights(list);
         for(int i=0;i<N;i++){
             (messagingNodes.get(nodeIDs[i])).sendData(message.getBytes());
-        }
+        } */
 
     }
     
+    private void sendLinkWeights(){
+        // Send linkWeights to each of the messaging nodes
+        int N = getNumberMessagingNodes();
+        int K = getDegree();
+        Edge[] list = new Edge[N*K]; // Pseudo-2D array, bby!
+        for(int i=0;i<N;i++){
+            for(int j=0;j<K;j++){
+                list[i*K+j] = (adjList.get(i)).get(j);
+            }
+        }
+        LinkWeights message = new LinkWeights(list);
+        for(String key : messagingNodes.keySet()){ //for(int i=0;i<N;i++){
+            try{
+                (messagingNodes.get(key)).sendData(message.getBytes());
+            }
+            catch(IOException uhOh){
+                System.out.println(uhOh.getMessage());
+                uhOh.printStackTrace();
+            }
+        }
+    }
+    
+    private void listWeights(){
+        //TODO provide errorhandling for adjList as null or incomplete
+        int N = getNumberMessagingNodes();
+        int K = getDegree();
+        for(int i=0;i<N;i++){
+            for(int j=0;j<K;j++){
+                System.out.println((adjList.get(i)).get(j));
+            }
+        }
+    }
+    
+    private void start(){
+        //TODO implement
+    }
 
 
     /**-------- MAIN ---------------------------------*/
@@ -319,7 +356,8 @@ public class Registry implements Node{
                 ;
             }
             else if(responseArgs[0].equals(options[1])){
-                ;
+                System.out.println("Listing links of messaging nodes:");
+                reg.listWeights();
             }
             else if(responseArgs[0].equals(options[2])){
                 try{
@@ -337,10 +375,12 @@ public class Registry implements Node{
                 }
             }
             else if(responseArgs[0].equals(options[3])){
-                ;
+                System.out.println("Sending link-weights to messaging nodes");
+                reg.sendLinkWeights();
             }
             else if(responseArgs[0].equals(options[4])){
-                ;
+                System.out.println("Starting rounds");
+                reg.start();
             }
             else{
                 System.out.println("Command unrecognized");
