@@ -271,19 +271,6 @@ public class Registry implements Node{
                 new MessagingNodesList(list);
             (messagingNodes.get(nodeIDs[i])).sendData(message.getBytes());
         }
-
-        /*// Send linkWeights //TODO move to diff method as in spec
-        Edge[] list = new Edge[N*K]; // Pseudo-2D array, bby!
-        for(int i=0;i<N;i++){
-            for(int j=0;j<K;j++){
-                list[i*K+j] = (adjList.get(i)).get(j);
-            }
-        }
-        LinkWeights message = new LinkWeights(list);
-        for(int i=0;i<N;i++){
-            (messagingNodes.get(nodeIDs[i])).sendData(message.getBytes());
-        } */
-
     }
     
     private void sendLinkWeights(){
