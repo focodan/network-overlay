@@ -57,6 +57,8 @@ public class RoundThread extends Thread {
         for(int i=0;i<5;i++){
             int r = rand.nextInt(/*(max - min) + 1*/);// + min; //check to make sure negs are OK
             Message m = new Message(r,path);
+            this.sendTracker.getAndIncrement();
+            this.sendSummation.getAndAdd(r);
             //System.out.println("Attempting to print: "+m);
             try{
                 neighbor.sendData(m.getBytes());

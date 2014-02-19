@@ -107,7 +107,10 @@ public class MessagingNode implements Node{
     
     public synchronized void onEvent(Event e, String connectID){
         //System.out.println("onEvent in MessagingNode receiving:"+e.getType()+" from: "+connectID);
-        int eventType = e.getType();
+        int eventType=0;
+        try{
+            eventType = e.getType();
+        }catch(Exception b){ System.out.println(b.getMessage()); b.printStackTrace(); return; }
         String ID;
         switch(eventType){
             case Protocol.REGISTER_REQUEST: {
