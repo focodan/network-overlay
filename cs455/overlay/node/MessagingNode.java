@@ -110,7 +110,19 @@ public class MessagingNode implements Node{
         int eventType = e.getType();
         String ID;
         switch(eventType){
-            // TODO write out appropriate cases
+            case Protocol.REGISTER_REQUEST: {
+                //call handleRegRequest to get response
+                // if response is non-null, send it via connectID's Connection
+                Event response = handleRegRequest(e, connectID);
+                if(response != null){
+                    /*try{
+                        incomingConnections.get(connectID).sendData(response.getBytes());
+                    }catch(IOException ie){
+                        ie.printStackTrace();
+                    }*/
+                }
+                break;
+            }
             case Protocol.REGISTER_RESPONSE: {
                 try{
                     RegisterResponse response = new RegisterResponse(e.getBytes());
@@ -134,6 +146,10 @@ public class MessagingNode implements Node{
             }
             case Protocol.Link_Weights: {
                 try{
+                    System.out.println("My peers are :");
+                    for(String key : messagingNodes.keySet()){ 
+                        System.out.print(key+" ");   
+                    } System.out.println();
                     /*MessagingNodesList contents = new MessagingNodesList(e.getBytes());
                     this.nodeList = contents.getInfoList();
                     connectToNeighbors(); //Connect to neighbors*/
@@ -159,7 +175,7 @@ public class MessagingNode implements Node{
             case Protocol.TASK_INITIATE: {
                 try{
                      RoundThread t = new RoundThread(registryConnection,
-                                    incomingConnections,dijk,sendTracker,
+                                    /*incomingConnections*/messagingNodes,dijk,sendTracker,
                                     sendSummation);
                      t.start();
                     
@@ -199,7 +215,7 @@ public class MessagingNode implements Node{
                                 nextID = route[i+1];
                             }
                         }
-                        incomingConnections.get(nextID).sendData(e.getBytes());
+                        messagingNodes.get(nextID).sendData(e.getBytes());
                         relayTracker.incrementAndGet();
                     }
                 } catch(Exception er){ er.printStackTrace(); }
@@ -234,11 +250,79 @@ public class MessagingNode implements Node{
     }
 
     /** -------- overlay ----------------------------------*/
+    //handles registration request, returns generated response event.
+    private Event handleRegRequest(Event regRequest, String connectID){
+        Event response = null;
+        String additionalInfo = ""; //to avoid passing null references
+        byte status = 0; //assumed valid 'til proven otherwise
+        try{
+            // create Register object from event and get its socket ID
+            Register reg = new Register(regRequest.getBytes());
+            String regID = SocketID.socketID(reg.getIPAddr(),reg.getPort());
+
+            // check if its connection is valid
+            if(!incomingConnections.containsKey(regID)){
+                status += 1;
+                additionalInfo += regID + " is not a valid connection. ";
+            }
+            //check if it is not already registered
+            if(messagingNodes.containsKey(regID)){
+                status += 2;
+                additionalInfo += regID + " is already registered. ";
+            }
+            // check if its connection matches connectID
+            if(!regID.equals(connectID)){
+                status += 4;
+                additionalInfo += regID + 
+                    " does not match its connection info:"+connectID+". ";
+            }
+            // if good status --> copy connection to message node list
+            if(status == 0){
+                // A node's ID should always be host:serverPort in registry
+                String regIDKey = SocketID.socketID(reg.getIPAddr(),reg.getServerPort());
+                System.out.println("Adding "+regID+ /* TODO debug */
+                    " to registry."+" as "+regIDKey+".  Its serverPort is:"+reg.getServerPort());
+                (incomingConnections.get(regID)).setInetServerPort(reg.getServerPort());
+                messagingNodes.put(regIDKey,incomingConnections.get(regID));
+                additionalInfo += "This is node "+(messagingNodes.size())+" in the registry";
+                
+                response = new RegisterResponse(status,additionalInfo);
+                messagingNodes.get(regIDKey).sendData(response.getBytes());
+            }
+            // create Response object to return
+            //TODO perhaps better style to use factory
+            response = new RegisterResponse(status,additionalInfo);
+            
+        }
+        /*catch(SocketException se){
+        }
+        catch(IOException ie){
+        }*/
+        catch(Exception e){
+            e.printStackTrace();
+        }
+
+        return response;
+    }
     // Register Connections to neighbors in infoList 
     // Scheme is to only send requests to peers with an ID of lesser lexographic
     // value, so that I avoid duplicate or self connections
     private void connectToNeighbors(){
         for(int i=0;i<nodeList.length;i++){
+        //if((this.ID).compareTo(nodeList[i]) > 0){ //TODO maybe bad
+            try{
+                Socket s = new Socket(SocketID.getIP(nodeList[i]),SocketID.getPort(nodeList[i]));
+                Connection c = new Connection(s,(this),this.serverPort);
+                Event registryRequest = new Register((c).getLocalIP(),
+                                (c).getLocalPort(),
+                                (c).getLocalServerPort());
+
+                (c).sendData(registryRequest.getBytes());
+                //THIS IS A HACK --THIS IS BAD, this should be done in reg-response handler
+                messagingNodes.put(nodeList[i],c); //TODO test
+            }catch(Exception ick){ ick.printStackTrace(); }
+        //}
+            /*
             //if((this.ID).compareTo(nodeList[i]) > 0){ //JUST FOR GIGGLES -- PERHAPS KEEP THIS COMMENT
                  try{
                      System.out.println("Connecting to peer: "+SocketID.getIP(nodeList[i])
@@ -251,6 +335,7 @@ public class MessagingNode implements Node{
                      uhOh.printStackTrace();
                  }
             //}
+            */
         }
     }
     

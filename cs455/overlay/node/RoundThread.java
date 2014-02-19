@@ -49,6 +49,7 @@ public class RoundThread extends Thread {
         }*/
         //if(peerConnections.containsKey(path[0]))System.out.println("It has this connection");
         Connection neighbor = peerConnections.get(path[0]); //problem line
+        if(neighbor==null)System.out.println("neighbor is broken, doesn't have: "+path[0]);
         /*System.out.println("Neighbor is: "+neighbor.getID());*/
         
         // make 5 random payloads
