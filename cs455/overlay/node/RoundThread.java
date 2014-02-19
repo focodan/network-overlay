@@ -47,7 +47,7 @@ public class RoundThread extends Thread {
         for( String k : peerConnections.keySet() ){
             System.out.print(k+" ");
         }*/
-        if(peerConnections.containsKey(path[0]))System.out.println("It has this connection");
+        //if(peerConnections.containsKey(path[0]))System.out.println("It has this connection");
         Connection neighbor = peerConnections.get(path[0]); //problem line
         /*System.out.println("Neighbor is: "+neighbor.getID());*/
         
@@ -60,15 +60,12 @@ public class RoundThread extends Thread {
             try{
                 neighbor.sendData(m.getBytes());
             }catch(Exception e){ System.out.println(e.getMessage()); e.printStackTrace(); }
-            try{
-                Thread.sleep(10);
-            }catch(Exception e){ e.printStackTrace(); }
         }
     }
 
     public void run(){
         // perform 5,000 rounds
-        for(int i=0;i</*5000*/20;i++){
+        for(int i=0;i<5000;i++){
             if(i%500==0){
                 System.out.println("Beginning round: "+i);
             }

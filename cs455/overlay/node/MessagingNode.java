@@ -106,7 +106,7 @@ public class MessagingNode implements Node{
     }
     
     public synchronized void onEvent(Event e, String connectID){
-        System.out.println("onEvent in MessagingNode receiving:"+e.getType()+" from: "+connectID);
+        //System.out.println("onEvent in MessagingNode receiving:"+e.getType()+" from: "+connectID);
         int eventType = e.getType();
         String ID;
         switch(eventType){
@@ -151,7 +151,7 @@ public class MessagingNode implements Node{
                             this.ID); // source
                     dijk.initialize();
                     dijk.execute();
-                    dijk.printAllShortestPathsFancy();
+                    //dijk.printAllShortestPathsFancy();
                     
                 } catch(Exception er){ er.printStackTrace(); }
                 break;
@@ -162,6 +162,22 @@ public class MessagingNode implements Node{
                                     incomingConnections,dijk,sendTracker,
                                     sendSummation);
                      t.start();
+                    
+                } catch(Exception er){ er.printStackTrace(); }
+                break;
+            }
+            case Protocol.PULL_TRAFIC_SUMMARY: {//PULL_TRAFIC_SUMMARY 
+            /*(this.registryConnection).getLocalIP(),
+                            (this.registryConnection).getLocalPort()
+            */
+                try{
+                     TaskSummaryResponse tResponse = new
+                     TaskSummaryResponse((this.registryConnection).getLocalIP(),
+                     (this.registryConnection).getLocalPort(),sendTracker.intValue(),sendSummation.longValue(),
+                     receiveTracker.intValue(),receiveSummation.longValue(),relayTracker.intValue());
+                     System.out.println("Sending traffic summary");
+                     (this.registryConnection).sendData(tResponse.getBytes());
+                     
                     
                 } catch(Exception er){ er.printStackTrace(); }
                 break;
@@ -198,7 +214,8 @@ public class MessagingNode implements Node{
     public synchronized void registerConnection(Connection c){
         System.out.println("registerConnection on "+c.getID()+" in MessagingNode");
         
-        if(!(incomingConnections.containsKey(incomingConnections.containsKey(c.getID())))){
+        if(!(incomingConnections.containsKey(incomingConnections.containsKey(c.getID()))))
+            {
             incomingConnections.put(c.getID(),c);
         }
         else{ //TODO change error handling, if any should be used

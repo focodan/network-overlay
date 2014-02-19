@@ -27,6 +27,7 @@ public class Registry implements Node{
     
     // Adjacency-List Graph for overlay and link weights
     private ArrayList<ArrayList<Edge>> adjList;
+    private int tasks = 0;
     
     // For making events
     EventFactory factory;
@@ -60,7 +61,7 @@ public class Registry implements Node{
     }
 
     public synchronized void onEvent(Event e, String connectID){
-        System.out.println("onEvent in MessagingNode receiving:"+e.getType()+" from: "+connectID);
+        //System.out.println("onEvent in MessagingNode receiving:"+e.getType()+" from: "+connectID);
         int eventType = e.getType();
         String ID;
         switch(eventType){
@@ -75,6 +76,36 @@ public class Registry implements Node{
                         ie.printStackTrace();
                     }
                 }
+                break;
+            }
+            case Protocol.TASK_COMPLETE: {
+                System.out.println("Task Complete from:"+connectID);
+                tasks++;
+                if(tasks == 10){
+                    System.out.println("Tasks are compelete");
+                    try{
+                    Thread.sleep(5000);
+                    }catch(Exception ek){ ek.printStackTrace(); }
+                    TaskSummaryRequest r = new TaskSummaryRequest();
+                    for(String key : messagingNodes.keySet()){ //for(int i=0;i<N;i++){
+                        try{
+                            (messagingNodes.get(key)).sendData(r.getBytes());
+                        }
+                        catch(IOException uhOh){
+                            System.out.println(uhOh.getMessage());
+                            uhOh.printStackTrace();
+                        }
+                    }
+                }
+                break;
+            }
+            case Protocol.TRAFFIC_SUMMARY: {
+                try{
+                    TaskSummaryResponse r = new TaskSummaryResponse(e.getBytes());
+                    System.out.println(r.getID()+" "+r.getSendTracker()+" "+r.getSendSummation()
+                    +" "+r.getreceiveTracker()+" "+r.getreceiveSummation()+
+                        " "+r.getRelayTracker());
+                }catch(Exception asdf){ asdf.printStackTrace(); }
                 break;
             }
             default: /* TODO add error handling */ break;
@@ -132,7 +163,7 @@ public class Registry implements Node{
                 // A node's ID should always be host:serverPort in registry
                 String regIDKey = SocketID.socketID(reg.getIPAddr(),reg.getServerPort());
                 System.out.println("Adding "+regID+ /* TODO debug */
-                    " to registry. Its serverPort is:"+reg.getServerPort());
+                    " to registry."+" as "+regIDKey+".  Its serverPort is:"+reg.getServerPort());
                 (incomingConnections.get(regID)).setInetServerPort(reg.getServerPort());
                 messagingNodes.put(regIDKey,incomingConnections.get(regID));
                 additionalInfo += "This is node "+(messagingNodes.size())+" in the registry";

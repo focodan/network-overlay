@@ -102,6 +102,24 @@ public class TaskSummaryResponse implements Event, Protocol {
     public int getType(){
         return this.type;
     }
+    public String getID(){
+        return new String(IP+":"+port);
+    }
+    public int getSendTracker(){
+        return sendTracker;
+    }
+    public long getSendSummation(){
+        return sendSummation;
+    }
+    public int getreceiveTracker(){
+        return receiveTracker;
+    }
+    public long getreceiveSummation(){
+        return receiveSummation;
+    }
+    public int getRelayTracker(){
+        return relayTracker;
+    }
 
     public String toString(){
         return "TaskSummaryResponse class";
