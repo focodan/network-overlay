@@ -283,7 +283,7 @@ public class Registry implements Node{
                     //for testing, this can be 1
                     int r = rand.nextInt((max - min) + 1) + min; 
                     ((adjList.get(i)).get(j)).setWeight(r);
-                    System.out.println("Adding Link "+((adjList.get(i)).get(j)));
+                    //System.out.println("Adding Link "+((adjList.get(i)).get(j)));
                     //Add its friend
                     for(int a=0;a<N;a++){
                         // We've found our dest
@@ -296,7 +296,7 @@ public class Registry implements Node{
                                 // We've found our source
                                 if(adjList.get(a).get(b).getDest().equals(((adjList.get(i)).get(j)).getSrc())){
                                     adjList.get(a).get(b).setWeight(r);
-                                    System.out.println("Adding Link: "+adjList.get(a).get(b));
+                                    //System.out.println("Adding Link: "+adjList.get(a).get(b));
                                 }
                             }
                             break;

@@ -343,13 +343,36 @@ public class MessagingNode implements Node{
     }
     
     /** -------- rounds -----------------------------------*/
-    
+    private void printShortest(){
+        if(dijk!=null)
+        dijk.printAllShortestPathsFancy();
+    }
 
     /** -------- main -------------------------------------*/
     public static void main(String[] args){
+        Scanner scan = new Scanner(System.in);
         System.out.println("Messaging node main()");
+        MessagingNode m = null;
         try{
-            MessagingNode m = new MessagingNode("pikes",5000);
+            m = new MessagingNode(args[0],new Integer(args[1]));
+            while(true){
+            System.out.println("Enter command: ");
+            String response = scan.nextLine();
+            System.out.println("You typed: "+response);
+            String [] responseArgs = response.split(" ");
+            
+            if(responseArgs[0].equals("print-shortest-path")){
+                m.printShortest();
+            }
+            else if(responseArgs[0].equals("exit-overlay")){
+                System.out.println("exiting overlay:");
+            }
+            else{
+                System.out.println("Command unrecognized");
+            }
+        }
         }catch(Exception e){ System.out.println(e.getMessage()); e.printStackTrace(); }
+        System.out.println("Registry accepting commands ...");
+        
     }
 }
