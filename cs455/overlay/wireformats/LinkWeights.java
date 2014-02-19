@@ -76,7 +76,7 @@ public class LinkWeights implements Event, Protocol {
     }
     
     public Edge[] getLinkWeights(){
-        return this.links;
+        return this.links; //it's okay that this allows escape
     }
 
     public String toString(){

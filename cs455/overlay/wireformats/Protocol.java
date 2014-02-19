@@ -17,4 +17,5 @@ public interface Protocol {
     public static final int TASK_COMPLETE        = 4007;
     public static final int PULL_TRAFIC_SUMMARY  = 4008;
     public static final int TRAFFIC_SUMMARY      = 4009;
+    public static final int MESSAGE_PAYLOAD      = 4010;
 }

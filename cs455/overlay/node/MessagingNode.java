@@ -13,6 +13,8 @@ import cs455.overlay.dijkstra.*;
 import java.io.*;
 import java.util.*;
 import java.net.*;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class MessagingNode implements Node{
@@ -41,11 +43,11 @@ public class MessagingNode implements Node{
     private Dijkstra dijk;
 
     // Tracking info
-    private int sendTracker;
-    private int receiveTracker;
-    private int relayTracker;
-    private long sendSummation;
-    private long receiveSummation;
+    private AtomicInteger sendTracker;
+    private AtomicInteger receiveTracker;
+    private AtomicInteger relayTracker;
+    private AtomicLong sendSummation;
+    private AtomicLong receiveSummation;
 
     public MessagingNode(String registryIP, int registryPort) throws IOException{
         this.registryIPAddr = registryIP;
@@ -75,11 +77,11 @@ public class MessagingNode implements Node{
     }
     
     private void initializeTrackingInfo(){
-        this.sendTracker = 0;
-        this.receiveTracker = 0;
-        this.relayTracker = 0;
-        this.sendSummation = 0;
-        this.receiveSummation = 0;
+        this.sendTracker = new AtomicInteger();
+        this.receiveTracker = new AtomicInteger();
+        this.relayTracker = new AtomicInteger();
+        this.sendSummation = new AtomicLong();
+        this.receiveSummation = new AtomicLong();
     }
     
     // Sets up connection from this node to the registry node, sends registration requests
@@ -138,10 +140,10 @@ public class MessagingNode implements Node{
                     LinkWeights contents = new LinkWeights(e.getBytes());
                     this.edgeList = contents.getLinkWeights();
                     //TODO debug
-                    System.out.println("My edge list:");
+                    /*System.out.println("My edge list:");
                     for(int i=0;i<this.edgeList.length;i++){
                         System.out.println(edgeList[i]);
-                    }
+                    }*/
                     // setup Dijkstra and pre-compute all shortest paths
                     dijk = new Dijkstra((edgeList.length/nodeList.length), //N
                             nodeList.length, // K
@@ -149,8 +151,40 @@ public class MessagingNode implements Node{
                             this.ID); // source
                     dijk.initialize();
                     dijk.execute();
-                    dijk.printAllShortestPathsFancy();
+                    //dijk.printAllShortestPathsFancy();
                     
+                } catch(Exception er){ er.printStackTrace(); }
+                break;
+            }
+            case Protocol.TASK_INITIATE: {
+                try{
+                    /*
+                     Create thread to start rounds
+                     */
+                    
+                } catch(Exception er){ er.printStackTrace(); }
+                break;
+            }
+            case Protocol.MESSAGE_PAYLOAD: {
+                try{
+                    Message message = new Message(e.getBytes());
+                    //String[] route = message.getRoute();
+                    if((this.ID).equals(message.getDest())){
+                        this.receiveTracker.incrementAndGet();
+                        this.receiveSummation.incrementAndGet();
+                    }
+                    else{
+                        //forward to next node
+                        String[] route = message.getRoute();
+                        String nextID = null;
+                        for(int i=0;i<route.length;i++){
+                            if(route[i].equals(this.ID)){
+                                nextID = route[i+1];
+                            }
+                        }
+                        incomingConnections.get(nextID).sendData(e.getBytes());
+                        relayTracker.incrementAndGet();
+                    }
                 } catch(Exception er){ er.printStackTrace(); }
                 break;
             }
@@ -201,6 +235,9 @@ public class MessagingNode implements Node{
             }
         }
     }
+    
+    /** -------- rounds -----------------------------------*/
+    
 
     /** -------- main -------------------------------------*/
     public static void main(String[] args){
