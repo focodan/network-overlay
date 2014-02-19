@@ -306,8 +306,17 @@ public class Registry implements Node{
         }
     }
     
-    private void start(){
-        //TODO implement
+    private void start(){ // sends message to start 'rounds' in messaging nodes
+        TaskInitiate message = new TaskInitiate();
+        for(String key : messagingNodes.keySet()){
+            try{
+                (messagingNodes.get(key)).sendData(message.getBytes());
+            }
+            catch(IOException uhOh){
+                System.out.println(uhOh.getMessage());
+                uhOh.printStackTrace();
+            }
+        }
     }
 
 

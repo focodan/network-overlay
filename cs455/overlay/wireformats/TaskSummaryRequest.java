@@ -13,14 +13,39 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class TaskSummaryRequest implements Event {
+public class TaskSummaryRequest implements Event, Protocol {
     private int type;
+    
+    public TaskSummaryRequest(){
+        this.type = PULL_TRAFIC_SUMMARY;
+    }
 
-    public TaskSummaryRequest(byte[] marshalledBytes) throws IOException { 
+    public TaskSummaryRequest(byte[] marshalledBytes) throws IOException {
+        ByteArrayInputStream baInputStream =	
+				new ByteArrayInputStream(marshalledBytes);	
+		DataInputStream din =	
+				new DataInputStream(new BufferedInputStream(baInputStream));	
+
+		this.type = din.readInt();		
+
+		baInputStream.close();	
+		din.close();
     }
 
     public byte[] getBytes() throws IOException { 
-        return null; 
+        byte[] marshalledBytes = null;	
+		ByteArrayOutputStream baOutputStream = new ByteArrayOutputStream();	
+		DataOutputStream dout =
+				new DataOutputStream(new BufferedOutputStream(baOutputStream));
+
+		dout.writeInt(this.type);
+
+		dout.flush();
+		marshalledBytes = baOutputStream.toByteArray();
+
+		baOutputStream.close();
+		dout.close();
+		return marshalledBytes; 
     }
 
     public int getType(){
