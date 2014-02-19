@@ -27,7 +27,12 @@ public class Registry implements Node{
     
     // Adjacency-List Graph for overlay and link weights
     private ArrayList<ArrayList<Edge>> adjList;
-    private int tasks = 0;
+    private int sum = 0;
+    private int tasks    = 0;
+    private int sentTotal= 0;
+    private long sendSum = 0;
+    private int recTotal = 0;
+    private long recSum  = 0;
     
     // For making events
     EventFactory factory;
@@ -102,9 +107,18 @@ public class Registry implements Node{
             case Protocol.TRAFFIC_SUMMARY: {
                 try{
                     TaskSummaryResponse r = new TaskSummaryResponse(e.getBytes());
+                    sum++;
                     System.out.println(r.getID()+" "+r.getSendTracker()+" "+r.getSendSummation()
                     +" "+r.getreceiveTracker()+" "+r.getreceiveSummation()+
                         " "+r.getRelayTracker());
+                    sentTotal +=r.getSendTracker();
+                    sendSum += r.getSendSummation();
+                    recTotal += r.getreceiveTracker();
+                    recSum += r.getreceiveSummation();
+                    if(sum == 10){
+                        System.out.println("Sum "+sentTotal+" "+sendSum
+                        +" "+recTotal+" "+recSum);
+                    }
                 }catch(Exception asdf){ asdf.printStackTrace(); }
                 break;
             }
