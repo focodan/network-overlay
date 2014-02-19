@@ -66,6 +66,9 @@ public class EventFactory {
             case Protocol.TRAFFIC_SUMMARY: {
                  result = new TaskSummaryResponse(data); break;
             }
+            case Protocol.MESSAGE_PAYLOAD: {
+                 result = new Message(data); break;
+            }
             default: /* add error handling, possibly throw*/ break; 
         } 
         }catch(IOException e){} //TODO fill in...

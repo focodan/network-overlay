@@ -151,16 +151,17 @@ public class MessagingNode implements Node{
                             this.ID); // source
                     dijk.initialize();
                     dijk.execute();
-                    //dijk.printAllShortestPathsFancy();
+                    dijk.printAllShortestPathsFancy();
                     
                 } catch(Exception er){ er.printStackTrace(); }
                 break;
             }
             case Protocol.TASK_INITIATE: {
                 try{
-                    /*
-                     Create thread to start rounds
-                     */
+                     RoundThread t = new RoundThread(registryConnection,
+                                    incomingConnections,dijk,sendTracker,
+                                    sendSummation);
+                     t.start();
                     
                 } catch(Exception er){ er.printStackTrace(); }
                 break;
@@ -221,7 +222,7 @@ public class MessagingNode implements Node{
     // value, so that I avoid duplicate or self connections
     private void connectToNeighbors(){
         for(int i=0;i<nodeList.length;i++){
-            if((this.ID).compareTo(nodeList[i]) > 0){
+            //if((this.ID).compareTo(nodeList[i]) > 0){ //JUST FOR GIGGLES -- PERHAPS KEEP THIS COMMENT
                  try{
                      System.out.println("Connecting to peer: "+SocketID.getIP(nodeList[i])
                          +" "+SocketID.getPort(nodeList[i]));
@@ -232,7 +233,7 @@ public class MessagingNode implements Node{
                      System.out.println(uhOh.getMessage());
                      uhOh.printStackTrace();
                  }
-            }
+            //}
         }
     }
     

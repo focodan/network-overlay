@@ -144,5 +144,27 @@ public class Dijkstra {
             System.out.println("\t"+getFancyShortestPath(key));
         }
     }
+    
+    //Returns a random shortest path, where destination cannot be source
+    public String[] getRandomPath(){
+        String destKey=null;
+        Random rand = new Random();
+        int min = 0;
+        int max = N-1; //TODO check bound
+        while(destKey==null){
+            int r = rand.nextInt((max - min) + 1) + min;
+            String key = edges[r*K].getSrc();
+            if(!key.equals(this.source)){
+                destKey = key;
+            }
+        }
+        String[] path = getShortestPath(destKey);
+        String[] returnPath = new String[ path.length -1];
+        for(int i=0;i<returnPath.length;i++){
+            returnPath[i] = path[i+1];
+        }
+        
+        return returnPath;
+    }
 
 }

@@ -92,7 +92,9 @@ public class Message implements Event, Protocol{
     }
 
     public String toString(){
-        return "Message class";
+        String routeString="";
+        for(int i=0;i<route.length;i++){ routeString += route[i]+" "; }
+        return new String(type+" "+payload+" "+routeString);
     }
 
 }
