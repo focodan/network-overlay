@@ -59,6 +59,9 @@ public class RoundThread extends Thread {
             //System.out.println("Attempting to print: "+m);
             try{
                 neighbor.sendData(m.getBytes());
+            }catch(Exception e){ System.out.println(e.getMessage()); e.printStackTrace(); }
+            try{
+                Thread.sleep(10);
             }catch(Exception e){ e.printStackTrace(); }
         }
     }
