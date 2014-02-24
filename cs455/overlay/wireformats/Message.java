@@ -78,10 +78,6 @@ public class Message implements Event, Protocol{
         return this.type;
     }
     
-    public int getPayLoad(){
-        return this.payload;
-    }
-    
     public String[] getRoute(){
         return (String[]) (this.route).clone();
     }

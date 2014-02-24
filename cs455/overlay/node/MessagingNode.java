@@ -207,7 +207,7 @@ public class MessagingNode implements Node{
                     //String[] route = message.getRoute();
                     if((this.ID).equals(message.getDest())){
                         this.receiveTracker.incrementAndGet();
-                        this.receiveSummation.getAndAdd(message.getPayLoad());
+                        this.receiveSummation.incrementAndGet();
                     }
                     else{
                         //forward to next node
